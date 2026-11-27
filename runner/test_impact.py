@@ -532,6 +532,18 @@ def with_claim(**kw):
     return mut
 
 
+def many_views(n):
+    def mut(s):
+        v0 = s["views"][0]
+        s["views"] += [dict(v0, id=f"extra{i}", sig="balanceOf(address)", args=["0x" + f"{i + 1:040x}"],
+                            role="state") for i in range(n - len(s["views"]))]
+    return mut
+
+
+s3 = copy.deepcopy(toy)
+many_views(gen_spec.MAX_VIEWS)(s3)
+ok(len(s3["views"]) == gen_spec.MAX_VIEWS == 512 and gen_spec.compile_spec(s3)["views"], "a spec with 512 views compiles")
+spec_err(many_views(gen_spec.MAX_VIEWS + 1), "a spec above 512 views is refused")
 spec_err(with_claim(sig="pos(uint256,address)", args=[7, "@account", 1]), "claim args of the wrong length")
 spec_err(with_claim(sig="pos(uint256,address)", args=[7, "0x" + "11" * 20]), 'claim args without "@account"')
 spec_err(with_claim(sig="pos(address,address)", args=["@account", "@account"]), 'two "@account" arguments')

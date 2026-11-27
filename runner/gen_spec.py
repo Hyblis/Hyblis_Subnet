@@ -37,7 +37,10 @@ ADDR_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
 LIMIT_DEFAULTS = {"max_warp_s": 3600, "max_roll": 300, "poc_gas": 300_000_000, "max_attackers": 64,
                   "max_steps": 16, "json_max_mb": 256, "forge_timeout_s": 900, "job_timeout_s": 2700}
 LIMIT_CAPS = {"poc_gas": 1_000_000_000, "max_attackers": 64, "max_steps": 16, "json_max_mb": 512}
-MAX_VIEWS, MAX_PROBES = 256, 16
+# A sanity bound on spec size, not the cost driver: the harness gas budget (harness_gas_limit) is dominated by
+# tokens x holders and attacker claims x attacker accounts. A lending protocol with several hubs needs a few
+# hundred views (Aave V4: 394, i.e. 2.5% of the worst-case reads of its measurement).
+MAX_VIEWS, MAX_PROBES = 512, 16
 
 
 class SpecError(Exception):
