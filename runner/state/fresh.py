@@ -11,7 +11,8 @@ collision. So, for a fresh address f:
 
   * its account is absent at the pinned block (balance 0, nonce 0, no code, no storage);
   * a slot keccak(pad32(f) . x) of ANY contract, and keccak(pad32(y) . keccak(pad32(f) . x)) (nested
-    mappings such as allowances), held zero at the pinned block, for every x and y.
+    mappings such as allowances, or a position keyed by a small id: m[f][id]), held zero at the pinned
+    block, for every x and y (m[id][f] is the first form with x = keccak(pad32(id) . base)).
 
 That holds for every x, so which bases x are precomputed only decides how many reads are covered,
 never whether an answer is right. Reads that are not covered stay misses, as before.
@@ -41,6 +42,8 @@ DISCOVER_SMALL = range(256)      # discovery also tries slots up to 255: OpenZep
 SMALL_STRUCT = 4                 # struct fields covered after keccak(key . small base)
 FOUND_STRUCT = 16                # struct fields covered after keccak(key . discovered base)
 NEST_SMALL = range(16)           # small bases also tried for nested (allowance-like) mappings
+NEST_IDS = range(32)             # small integer keys paired with a fresh address in a nested mapping, e.g. a
+                                 # lending position m[user][reserveId] (Aave V4 Spoke._userPositions) or m[id][user]
 MAX_KEYS_FLAT = 256              # fresh addresses whose first-level mapping slots are precomputed
 MAX_KEYS_NESTED = 24             # fresh addresses whose nested mapping slots are precomputed
 MAX_PARTNERS = 256
@@ -143,6 +146,8 @@ class FreshSet:
         nest_bases = sorted(set(NEST_SMALL) | set(bases) | {b + d for b in bases for d in (1, 2, 3)})
         nb_w = [_w(b) for b in nest_bases]
         inner_p = {p: [keccak(_pad_addr(p) + wb) for wb in nb_w] for p in partners}
+        ids_w = [_w(j) for j in NEST_IDS]
+        ids_inner = [[keccak(wj + wb) for wj in ids_w] for wb in nb_w]      # keccak(id . base), per base
         for f in nest_keys:
             pf = _pad_addr(f)
             inner_f = [keccak(pf + wb) for wb in nb_w]
@@ -151,6 +156,10 @@ class FreshSet:
                 for i_f, i_p in zip(inner_f, inner_p[p]):
                     z.add(int.from_bytes(keccak(pp + i_f), "big"))     # m[f][p], e.g. allowance(f, p)
                     z.add(int.from_bytes(keccak(pf + i_p), "big"))     # m[p][f], e.g. allowance(p, f)
+            for inner, id_inner in zip(inner_f, ids_inner):             # m[f][id] and m[id][f], id < 32
+                for wj, ii in zip(ids_w, id_inner):
+                    for h in (int.from_bytes(keccak(wj + inner), "big"), int.from_bytes(keccak(pf + ii), "big")):
+                        z.update(h + i for i in range(SMALL_STRUCT))
         self.slots = frozenset(z)
         self.stats = {"accounts": len(self.accounts), "keys": len(flat_keys), "nested_keys": len(nest_keys),
                       "partners": len(partners), "bases": len(bases), "slots": len(self.slots),

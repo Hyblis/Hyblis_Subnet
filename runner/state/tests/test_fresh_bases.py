@@ -37,6 +37,22 @@ class BasesTest(unittest.TestCase):
             fs = fresh.FreshSet([FRESH], keys=[FRESH], bases=bases)
             self.assertTrue(fs.has_slot(hex(slot_of(FRESH, base))), base)
 
+    def test_nested_id_positions(self):
+        """m[user][id] (a lending position per reserve id) and m[id][user], with struct fields."""
+        fs = fresh.FreshSet([FRESH], keys=[FRESH], bases=[])
+        for base in (4, 15):
+            for j in (0, 7, 31):
+                user_first = int.from_bytes(keccak(j.to_bytes(32, "big") + keccak(bytes(12) + bytes.fromhex(FRESH[2:])
+                                                                                 + base.to_bytes(32, "big"))), "big")
+                id_first = int.from_bytes(keccak(bytes(12) + bytes.fromhex(FRESH[2:]) +
+                                                 keccak(j.to_bytes(32, "big") + base.to_bytes(32, "big"))), "big")
+                for f in (0, 2):
+                    self.assertTrue(fs.has_slot(hex(user_first + f)), (base, j, f))
+                    self.assertTrue(fs.has_slot(hex(id_first + f)), (base, j, f))
+        far = int.from_bytes(keccak((32).to_bytes(32, "big") + keccak(bytes(12) + bytes.fromhex(FRESH[2:]) +
+                                                                      (4).to_bytes(32, "big"))), "big")
+        self.assertFalse(fs.has_slot(hex(far)), "ids from 32 on are not precomputed")
+
     def test_unknown_layout_is_not_invented(self):
         snap = FakeSnap("sha256:test-none", [(TOKEN, hex(slot_of(HOLDER, 300)), "0x01")])
         self.assertNotIn(300, fresh.mapping_bases(snap))
