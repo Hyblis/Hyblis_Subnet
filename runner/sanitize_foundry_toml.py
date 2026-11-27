@@ -93,11 +93,26 @@ def solc_version(cfg: dict) -> str | None:
     return str(v) if v and all(c.isdigit() or c == "." for c in str(v)) else None
 
 
+MAX_OPTIMIZER_RUNS = 2 ** 32 - 1     # Foundry 1.9.0 refuses a larger optimizer_runs (solc reads it as u32)
+
+
+def clamp_runs(v):
+    """optimizer_runs above Foundry's u32 maximum (a project's "maximum runs" idiom, e.g. 444444444444)
+    becomes the maximum, in the profile and in every compiler profile or restriction that sets it. It only
+    affects how the job compiles the PoC: fork state is the live, deployed code."""
+    if isinstance(v, dict):
+        return {k: (min(x, MAX_OPTIMIZER_RUNS) if k == "optimizer_runs" and isinstance(x, int) else clamp_runs(x))
+                for k, x in v.items()}
+    if isinstance(v, list):
+        return [clamp_runs(x) for x in v]
+    return v
+
+
 def runner_toml(cfg: dict, solc_path: str, gas_limit: int | None = None) -> str:
     """gas_limit: the harness test's total budget (gen_spec.harness_gas_limit of the task's spec); every
     runner job passes it. Without it (compile-only uses) the hardened default stays."""
     prof = cfg.get("profile", {}).get("default", {})
-    out = {k: v for k, v in prof.items() if k in COMPILE_KEYS and k not in RUNNER_DROP_COMPILE}
+    out = clamp_runs({k: v for k, v in prof.items() if k in COMPILE_KEYS and k not in RUNNER_DROP_COMPILE})
     out["solc"] = solc_path
     out.update(HARDENED)
     if gas_limit is not None:

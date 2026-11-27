@@ -524,6 +524,41 @@ spec_err(lambda s: s["limits"].__setitem__("poc_gas", 10**10), "poc_gas above th
 spec_err(lambda s: s["limits"].pop("horizon_basis"), "time limits without the protocol horizon they come from")
 spec_err(lambda s: s["probes"][0].__setitem__("args", []), "wrong number of probe arguments")
 spec_err(lambda s: s["attacker_claims"][0].__setitem__("sig", "deposits(uint256)"), "claim view not taking an address")
+
+
+def with_claim(**kw):
+    def mut(s):
+        s["attacker_claims"][0].update(kw)
+    return mut
+
+
+spec_err(with_claim(sig="pos(uint256,address)", args=[7, "@account", 1]), "claim args of the wrong length")
+spec_err(with_claim(sig="pos(uint256,address)", args=[7, "0x" + "11" * 20]), 'claim args without "@account"')
+spec_err(with_claim(sig="pos(address,address)", args=["@account", "@account"]), 'two "@account" arguments')
+spec_err(with_claim(sig="pos(uint256,address)", args=["@account", "0x" + "11" * 20]), '"@account" on a uint argument')
+spec_err(with_claim(sig="pos(string,address)", args=["x", "@account"]), "a dynamic claim argument")
+spec_err(lambda s: s["attacker_claims"].append(dict(s["attacker_claims"][0], id="dup")), "two claims, same call")
+s2 = copy.deepcopy(toy)
+s2["attacker_claims"][0].update(sig="getUserSuppliedAssets(uint256,address)", args=[7, "@account"])
+s2["attacker_claims"].append(dict(s2["attacker_claims"][0], id="mid", sig="f(uint256,address,bool)",
+                                  args=[3, "@account", True]))
+c2 = gen_spec.compile_spec(s2)
+cl, mid = c2["attacker_claims"][0], c2["attacker_claims"][-1]
+who = "0x" + "ab" * 20
+want = gen_spec.sel("getUserSuppliedAssets(uint256,address)") + f"{7:064x}" + "0" * 24 + "ab" * 20
+ok(cl["prefix"] == want[:72] and cl["suffix"] == "" and tv._claim_calldata(cl, who).hex() == want,
+   "a claim with a reserve id puts the account word after it")
+ok(mid["suffix"] == f"{1:064x}" and tv._claim_calldata(mid, who).hex() ==
+   gen_spec.sel("f(uint256,address,bool)") + f"{3:064x}" + "0" * 24 + "ab" * 20 + f"{1:064x}",
+   "a claim with arguments after the account keeps them as the suffix")
+one = c["attacker_claims"][0]
+ok(one["prefix"] == one["selector"] and one["suffix"] == "" and
+   tv._claim_calldata(one, who) == bytes.fromhex(one["selector"] + "0" * 24 + "ab" * 20),
+   "a one-address claim reads exactly as before")
+ok(tv._claim_calldata({"selector": one["selector"]}, who) == tv._claim_calldata(one, who),
+   "a claim compiled without a template reads the same")
+sol2 = gen_spec.render_solidity(c2)
+ok(f'pre[0] = hex"{cl["prefix"]}"; post[0] = hex"";' in sol2, "HyblisSpec.sol carries the claim templates")
 for task in ("cap", "aave-v4"):
     sj = json.loads((HERE.parent / "tasks" / task / "impact-spec.json").read_text())
     try:
@@ -548,6 +583,12 @@ t = sft.runner_toml(cfg, "/opt/solc")
 for bad in ("eth_rpc_url", "sender", "libraries", "rpc_endpoints", "[profile.evil]", "solc_version"):
     ok(bad not in t, f"runner toml drops {bad}")
 ok(f"gas_limit = {gl}" in sft.runner_toml(cfg, "/opt/solc", gl), "runner toml carries the task's harness gas budget")
+big = {"profile": {"default": {"optimizer_runs": 444444444444, "additional_compiler_profiles": [
+    {"name": "hub", "optimizer_runs": 22300}, {"name": "tests", "optimizer_runs": 444444444444}],
+    "compilation_restrictions": [{"paths": "tests/**", "optimizer_runs": 444444444444}]}}}
+tb = sft.runner_toml(big, "/opt/solc")
+ok("444444444444" not in tb and tb.count("optimizer_runs = 4294967295") == 3 and
+   "optimizer_runs = 22300" in tb, "runner toml clamps optimizer_runs to Foundry's u32 maximum everywhere")
 for good in ('ffi = false', 'fs_permissions = []', 'offline = true', 'dynamic_test_linking = false', 'isolate = true',
              'solc = "/opt/solc"', 'remappings = ["a/=b/"]', 'lint_on_build = false', 'always_use_create_2_factory = false'):
     ok(good in t, f"runner toml sets {good}")

@@ -49,6 +49,35 @@ def sel(sig: str) -> str:
     return keccak(text=sig)[:4].hex()
 
 
+ACCOUNT = "@account"
+STATIC_ARG = re.compile(r"address|bool|u?int\d*|bytes([1-9]|[12]\d|3[0-2])")
+
+
+def _claim_template(c: dict, w: str, encode_args) -> tuple[str, str]:
+    """An attacker claim is read once per attacker account. Its calldata is `prefix + account + suffix`
+    (hex, no 0x): the selector and the 32-byte words before the account argument, then the words after
+    it. A one-address signature needs no `args`; any other takes `args` with exactly one "@account"
+    (an address argument) and only static types, so the account word sits at a fixed offset."""
+    types = split_types(c["sig"])
+    args = c.get("args")
+    if args is None:
+        if types != ["address"]:
+            raise SpecError(f"{w}: an attacker-claim view takes one address argument, or `args` with one "
+                            f'"{ACCOUNT}"')
+        args = [ACCOUNT]
+    if not isinstance(args, list) or len(args) != len(types):
+        raise SpecError(f"{w}: args must list one value per argument of {c['sig']}")
+    at = [i for i, a in enumerate(args) if a == ACCOUNT]
+    if len(at) != 1 or types[at[0]] != "address":
+        raise SpecError(f'{w}: exactly one address argument must be "{ACCOUNT}"')
+    if not all(STATIC_ARG.fullmatch(t) for t in types):
+        raise SpecError(f"{w}: attacker-claim arguments must be static types")
+    zero = "0x" + "00" * 20
+    data = encode_args(c["sig"], [zero if i == at[0] else a for i, a in enumerate(args)], w)[2:]
+    k = 8 + 64 * at[0]
+    return data[:k], data[k + 64:]
+
+
 def split_types(sig: str) -> list[str]:
     if "(" not in sig or not sig.endswith(")"):
         raise SpecError(f"bad signature {sig!r}")
@@ -282,16 +311,18 @@ def compile_spec(spec: dict, allow_draft: bool = False) -> dict:
     claims = []
     for i, c in enumerate(spec.get("attacker_claims", [])):
         w = f"attacker_claims[{i}]"
-        _keys(c, w, {"id", "target", "sig", "type", "token"}, {"sign"})
-        if split_types(c["sig"]) != ["address"]:
-            raise SpecError(f"{w}: an attacker-claim view takes exactly one address argument")
+        _keys(c, w, {"id", "target", "sig", "type", "token"}, {"sign", "args"})
+        prefix, suffix = _claim_template(c, w, encode_args)
         if c["token"] not in sym:
             raise SpecError(f"{w}: unknown token")
         sign = _int(c.get("sign", 1), f"{w}.sign")
         if sign not in (1, -1):
             raise SpecError(f"{w}: sign must be 1 (asset) or -1 (liability)")
         claims.append({"id": c["id"], "target": resolve_addr(c["target"], w), "selector": sel(c["sig"]),
+                       "prefix": prefix, "suffix": suffix,
                        "sig": c["sig"], "type": c["type"], "token": c["token"], "sign": sign})
+    if len({(c["target"], c["prefix"], c["suffix"]) for c in claims}) != len(claims):
+        raise SpecError("attacker_claims: two claims make the same call")
 
     names = set(vid) | {f"bal_{t['symbol']}_{h['id']}" for t in tokens for h in holders}
     invariants = []
@@ -525,11 +556,15 @@ def render_solidity(c: dict) -> str:
     for i, v in enumerate(c["views"]):
         lines.append(f"        t[{i}] = {_sol_addr(v['target'])}; d[{i}] = hex\"{v['calldata'][2:]}\";")
     lines += ["    }", "",
-              "    function claimTemplates() internal pure returns (address[] memory t, bytes4[] memory s) {",
+              "    function claimTemplates()",
+              "        internal pure returns (address[] memory t, bytes[] memory pre, bytes[] memory post)",
+              "    {",
               f"        t = new address[]({len(c['attacker_claims'])});",
-              f"        s = new bytes4[]({len(c['attacker_claims'])});"]
+              f"        pre = new bytes[]({len(c['attacker_claims'])});",
+              f"        post = new bytes[]({len(c['attacker_claims'])});"]
     for i, cl in enumerate(c["attacker_claims"]):
-        lines.append(f"        t[{i}] = {_sol_addr(cl['target'])}; s[{i}] = 0x{cl['selector']};")
+        lines.append(f"        t[{i}] = {_sol_addr(cl['target'])}; pre[{i}] = hex\"{cl['prefix']}\"; "
+                     f"post[{i}] = hex\"{cl['suffix']}\";")
     lines += ["    }", "",
               "    function probes() internal pure",
               "        returns (address[] memory a, address[] memory t, bytes[] memory d, uint256[] memory g)",
