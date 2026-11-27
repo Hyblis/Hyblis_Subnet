@@ -1,0 +1,14 @@
+# Toy project for the state-layer end-to-end test (runner/state/tests/test_e2e.py). Toy contracts only.
+# lib/forge-std is linked in at test time (HYBLIS_FORGE_STD); nothing is downloaded.
+[profile.default]
+src = "src"
+test = "test"
+out = "out"
+libs = ["lib"]
+remappings = ["forge-std/=lib/forge-std/src/"]
+solc_version = "0.8.28"
+offline = true
+ffi = false
+fs_permissions = []
+dynamic_test_linking = false
+isolate = true
