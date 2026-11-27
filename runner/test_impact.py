@@ -583,6 +583,9 @@ t = sft.runner_toml(cfg, "/opt/solc")
 for bad in ("eth_rpc_url", "sender", "libraries", "rpc_endpoints", "[profile.evil]", "solc_version"):
     ok(bad not in t, f"runner toml drops {bad}")
 ok(f"gas_limit = {gl}" in sft.runner_toml(cfg, "/opt/solc", gl), "runner toml carries the task's harness gas budget")
+ok('test = "test"' in sft.runner_toml({"profile": {"default": {"test": "tests"}}}, "/opt/solc") and
+   'test = "tests"' not in sft.runner_toml({"profile": {"default": {"test": "tests"}}}, "/opt/solc"),
+   "runner toml compiles test/ (the PoC's directory) whatever test directory the project names")
 big = {"profile": {"default": {"optimizer_runs": 444444444444, "additional_compiler_profiles": [
     {"name": "hub", "optimizer_runs": 22300}, {"name": "tests", "optimizer_runs": 444444444444}],
     "compilation_restrictions": [{"paths": "tests/**", "optimizer_runs": 444444444444}]}}}

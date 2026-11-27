@@ -93,6 +93,7 @@ def solc_version(cfg: dict) -> str | None:
     return str(v) if v and all(c.isdigit() or c == "." for c in str(v)) else None
 
 
+POC_TEST_DIR = "test"                # parent of the runner's test/hyblis/
 MAX_OPTIMIZER_RUNS = 2 ** 32 - 1     # Foundry 1.9.0 refuses a larger optimizer_runs (solc reads it as u32)
 
 
@@ -114,6 +115,9 @@ def runner_toml(cfg: dict, solc_path: str, gas_limit: int | None = None) -> str:
     prof = cfg.get("profile", {}).get("default", {})
     out = clamp_runs({k: v for k, v in prof.items() if k in COMPILE_KEYS and k not in RUNNER_DROP_COMPILE})
     out["solc"] = solc_path
+    # the runner writes the PoC and its own files under test/hyblis/: forge must compile that directory,
+    # whatever test directory the project names for its own suite (e.g. Aave V4's "tests")
+    out["test"] = POC_TEST_DIR
     out.update(HARDENED)
     if gas_limit is not None:
         if not isinstance(gas_limit, int) or isinstance(gas_limit, bool) or not 0 < gas_limit < 2 ** 63:
