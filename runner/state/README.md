@@ -407,6 +407,9 @@ The runner's loop:
 `runner/state/tests/run.sh` drops to user `pinc` and runs at idle priority. It uses anvil on
 127.0.0.1:9864, or 9865 if 9864 is busy, plus an IPC socket, and makes no network calls.
 
+- **`test_ratelimit.py`** (offline, a local HTTP stub): HTTP 429 and JSON-RPC rate-limit errors (codes 429,
+  -32005, 15 or a "rate limit" message) are retried on their own budget (`Client.RATE_DELAYS`, about 4 minutes,
+  at least the upstream's Retry-After), the budget is finite, `retries=0` never waits, other errors are unchanged.
 - **`test_mpt.py`** (offline):
   - the cap header against `tasks/cap/manifest.json`;
   - real mainnet proofs, with every tampering kind: wrong value, wrong root, truncated, extra node,

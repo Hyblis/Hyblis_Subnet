@@ -42,6 +42,14 @@ class TransportError(Exception):
     pass
 
 
+class RateLimited(TransportError):
+    """HTTP 429 from the upstream; `retry_after` is its Retry-After header in seconds, if it sent one."""
+
+    def __init__(self, message: str, retry_after: float | None = None):
+        super().__init__(message)
+        self.retry_after = retry_after
+
+
 _OUTSIDE = re.compile(rb'["{}\[\]]')
 _INSIDE = re.compile(rb'["\\]')
 _MAX_DEPTH = 64
@@ -140,11 +148,18 @@ class Client:
 
     RETRY_HTTP = {429, 500, 502, 503, 504}
     RETRY_CODES = {429, -32005}
+    # rate limits (HTTP 429, or a JSON-RPC error that says so: 429, -32005 "limit exceeded", 15 on drpc's
+    # public endpoint) get their own, longer budget: a public endpoint throttles bursts for tens of seconds
+    RATE_CODES = {429, -32005, 15}
+    RATE_DELAYS = (1, 2, 4, 8, 15, 30, 30, 30, 30, 30, 30, 30)     # about 4 minutes in all
 
-    def __init__(self, endpoint: str, timeout: float = 60.0, retries: int = 4, max_response: int = 256 << 20):
+    def __init__(self, endpoint: str, timeout: float = 60.0, retries: int = 4, max_response: int = 256 << 20,
+                 rate_delays: tuple | None = None):
         self.endpoint = endpoint
         self.timeout = timeout
         self.retries = retries
+        self.rate_delays = self.RATE_DELAYS if rate_delays is None else tuple(rate_delays)
+        self.rate_waits = 0
         self.max_response = max_response
         self.is_http = endpoint.startswith(("http://", "https://"))
         self._lock = threading.Lock()
@@ -161,23 +176,34 @@ class Client:
                 finally:
                     self._sock = None
 
+    @classmethod
+    def is_rate_limit(cls, e: Exception) -> bool:
+        if isinstance(e, RateLimited):
+            return True
+        return isinstance(e, RpcError) and (e.code in cls.RATE_CODES or "rate limit" in str(e).lower())
+
     def call(self, method: str, params: list):
         delay = 0.5
-        for attempt in range(self.retries + 1):
+        attempt = rate = 0
+        while True:
             try:
                 return self._call_once(method, params)
-            except RpcError as e:
-                if e.code in self.RETRY_CODES and attempt < self.retries:
-                    time.sleep(delay)
-                    delay *= 2
+            except (RpcError, TransportError) as e:
+                if self.retries and self.is_rate_limit(e) and rate < len(self.rate_delays):
+                    wait = self.rate_delays[rate]
+                    if isinstance(e, RateLimited) and e.retry_after is not None:
+                        wait = max(wait, min(e.retry_after, 60))
+                    rate += 1
+                    self.rate_waits += 1
+                    time.sleep(wait)
                     continue
-                raise
-            except TransportError:
-                if attempt < self.retries:
-                    time.sleep(delay)
-                    delay *= 2
-                    continue
-                raise
+                if isinstance(e, RateLimited) or attempt >= self.retries:
+                    raise
+                attempt += 1
+                if isinstance(e, RpcError) and e.code not in self.RETRY_CODES:
+                    raise
+                time.sleep(delay)
+                delay *= 2
 
     def _call_once(self, method, params):
         with self._lock:
@@ -206,6 +232,9 @@ class Client:
                 data = r.read(self.max_response + 1)
         except urllib.error.HTTPError as e:
             payload = e.read(4096)
+            if e.code == 429:
+                ra = (e.headers or {}).get("Retry-After") if hasattr(e, "headers") else None
+                raise RateLimited("HTTP 429", float(ra) if ra and str(ra).strip().isdigit() else None) from None
             if e.code in self.RETRY_HTTP:
                 raise TransportError(f"HTTP {e.code}") from None
             try:  # many providers return a JSON-RPC error body with HTTP 400
