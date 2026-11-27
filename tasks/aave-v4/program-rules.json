@@ -1,0 +1,37 @@
+{
+ "task_id": "aave-v4",
+ "written": "2026-11-16",
+ "purpose": "Machine-readable rules the runner applies before a finding is accepted. Written per program, in advance, so the automatic validator rejects out-of-scope impacts without a human in the loop.",
+ "trusted_roles": [
+  "protocol governance / DAO executor",
+  "pool admin, risk admin, emergency admin",
+  "oracle owner / price feed admins",
+  "upgrade proxy admins"
+ ],
+ "trusted_roles_note": "Anything that requires one of these roles to act is out of scope; the runner rejects a PoC whose impact depends on impersonating or re-keying a trusted role.",
+ "in_scope_impacts": ["funds_loss", "funds_freeze", "insolvency", "unauthorized_mint", "accounting_error"],
+ "out_of_scope": [
+  "admin-only functions and privileged-role actions",
+  "known/acknowledged issues and prior audit findings",
+  "centralization risks that require a trusted role",
+  "gas inefficiency, best-practice and informational issues (not Medium/Low loss)",
+  "third-party integrations and tokens not deployed by the program",
+  "theoretical issues with no measured on-chain impact at the pinned fork block"
+ ],
+ "severity_caps": {
+  "note": "Only Medium and Low are filed from this task at launch.",
+  "max_tier": "medium",
+  "funds_at_risk_rule": "A finding's severity is the lower of the miner's claim and the measured impact. A finding mapped above Medium is held, not auto-filed, pending an owner decision on the deposit."
+ },
+ "severity_by_impact": {
+  "funds_loss": "medium",
+  "funds_freeze": "medium",
+  "insolvency": "medium",
+  "unauthorized_mint": "medium",
+  "accounting_error": "low",
+  "griefing": "low",
+  "dos": "low",
+  "info": "low"
+ },
+ "severity_by_impact_note": "Capped at Medium on purpose for this launch task. When High/Critical tiers are opened (deposit decision), restore the standard mapping in runner/impact.py."
+}

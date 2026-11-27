@@ -1,0 +1,36 @@
+{
+ "task_id": "cap",
+ "written": "2026-11-16",
+ "purpose": "Machine-readable rules for the reference task. The public fields (trusted_roles, in_scope_impacts, out_of_scope, severity_by_impact) are shown on the program page; nothing here names an external platform.",
+ "trusted_roles": [
+  "Protocol admins (the multisig and developer accounts)",
+  "Access-control role holders set by the protocol",
+  "Oracle and rate-feed administrators",
+  "Upgrade proxy administrators"
+ ],
+ "in_scope_impacts": [
+  "funds_loss",
+  "funds_freeze",
+  "insolvency",
+  "unauthorized_mint",
+  "accounting_error"
+ ],
+ "out_of_scope": [
+  "Admin-only functions and actions by privileged roles",
+  "Contracts that are not deployed",
+  "Known issues from previous audits",
+  "Gelato automation and other external integrations",
+  "Documentation and code-comment issues",
+  "Issues with no measured on-chain impact at the pinned fork block"
+ ],
+ "severity_by_impact": {
+  "funds_loss": "medium",
+  "funds_freeze": "medium",
+  "insolvency": "medium",
+  "unauthorized_mint": "medium",
+  "accounting_error": "low",
+  "griefing": "low",
+  "dos": "low",
+  "info": "low"
+ }
+}

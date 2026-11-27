@@ -1,0 +1,135 @@
+{
+ "task_id": "cap",
+ "manifest_version": 1,
+ "created": "2026-11-14",
+ "status": "draft",
+ "profile": "P1-EVM-FOUNDRY-FORK",
+ "program": {
+  "name": "Cap",
+  "platform": "external bug bounty",
+  "rules_snapshot": "2026-11-14",
+  "max_rewards_usd": {
+   "critical": 1000000
+  },
+  "critical_cap": "payout <= 10% of funds at risk at time of submission",
+  "poc_rule": "A coded Proof of Concept is required; submit through the program's own bounty platform only.",
+  "notes": [
+   "Only core contracts qualify for Critical: AccessControl, Delegation, FeeAuction, FeeReceiver, Oracle, Lender, Vault, FractionalReserve, Minter (and inherited)",
+   "Low/Informational not rewarded. High/Medium tiers not captured in our snapshot - re-check the program page (OI-5)",
+   "If the team can pause/upgrade, damage is limited to a 1-hour exploit window",
+   "Out of scope: non-deployed contracts, known audit issues, Gelato, external integrations, docs/NatSpec. Protocol admins (multisig, developer EOA) are trusted",
+   "Platform rules: reports only through the program's bounty platform; no testing on live networks; no disclosure of a submitted vulnerability without consent."
+  ]
+ },
+ "code": {
+  "repo": "https://github.com/cap-labs-dev/cap-contracts",
+  "commit": "695c8280b410bce1b43c9254cb214be30fe51dde",
+  "foundry_root": ".",
+  "in_scope_paths": [
+   "contracts"
+  ],
+  "upstream_checkout": "tasks/upstream/cap",
+  "live_code_note": "No single commit equals the live system: implementations were deployed at different blocks. Reference source = Sourcify-verified sources in tasks/cap/live-sources/. vs main@695c828: Lender differs in 4 files (ReserveLogic, AgentConfiguration, IDelegation, IVault), CapToken in 2 (Vault, IRateOracle), Oracle in 2 (RateOracle, IRateOracle); the rest identical.",
+  "npm_install": "yarn@1.22.22 install --frozen-lockfile --ignore-scripts --ignore-engines (package.json asks node ^20.18; only Solidity sources are used)"
+ },
+ "chain": {
+  "chain_id": 1,
+  "fork_block": 26429948,
+  "fork_block_hash": "0x6beda9fc624cf8f81b5f1f860a892108415880a693eb5a5169c0d1d805389df6",
+  "fork_block_timestamp": 1794860495,
+  "deployment_source": "config/cap-infra.json, config/cap-vaults-1.json; live implementations read from EIP-1967 slots at the fork block",
+  "snapshot_digest": "sha256:e852e36fa99191df46d676f1a5544003e7d183c27a98eee594c0f57272542fde"
+ },
+ "deployed": {
+  "AccessControl": "0x7731129a10d51e18cDE607C5C115F26503D2c683",
+  "Delegation": "0xF3E3Eae671000612CE3Fd15e1019154C1a4d693F",
+  "Lender": "0x15622c3dbbc5614E6DFa9446603c1779647f01FC",
+  "Oracle": "0xcD7f45566bc0E7303fB92A93969BB4D3f6e662bb",
+  "cUSD_CapToken_Vault": "0xcCcc62962d17b8914c62D74FfB843d73B2a3cccC",
+  "stcUSD_StakedCap": "0x88887bE419578051FF9F4eb6C858A951921D8888",
+  "FeeAuction": "0xa1a20aBdc873CF291c22Ce3C8968EC06277324D0",
+  "FeeReceiver": "0x0036c7b9b62c53F47c804a5643F0c09f864beF0b",
+  "debtUSDC": "0xfa8C6D0b95d9191B5A1D51C868Da2BDFd6C04Ff9",
+  "live_implementations": {
+   "Lender": {
+    "implementation": "0x68c4f03b8640c0393a832987147bae7a0b27aaa7",
+    "sourcify_match": "match",
+    "deployed_block": "23298492",
+    "sources": "tasks/cap/live-sources/Lender/"
+   },
+   "CapToken": {
+    "implementation": "0xbdaa34082f1a1a3c32190a672bc9dd1b69791b97",
+    "sourcify_match": "match",
+    "deployed_block": "26055554",
+    "sources": "tasks/cap/live-sources/CapToken/"
+   },
+   "Oracle": {
+    "implementation": "0x4607a3cb26190c51d05429082944fb8b2703b622",
+    "sourcify_match": "match",
+    "deployed_block": "26048987",
+    "sources": "tasks/cap/live-sources/Oracle/"
+   },
+   "AccessControl": {
+    "implementation": "0x6681eb184c876d74ea3ddfae0ecee0c9c0f84bc1",
+    "sourcify_match": "exact_match",
+    "deployed_block": "22867447",
+    "sources": "tasks/cap/live-sources/AccessControl/"
+   },
+   "Delegation": {
+    "implementation": "0x7e2d738042376bf48bebc49932869eac3d7e38b5",
+    "sourcify_match": "exact_match",
+    "deployed_block": "24499916",
+    "sources": "tasks/cap/live-sources/Delegation/"
+   },
+   "StakedCap": {
+    "implementation": "0x42c0e0ef7c2f35de073f4d6f9c0e4483429c3d31",
+    "sourcify_match": "exact_match",
+    "deployed_block": "23134548",
+    "sources": "tasks/cap/live-sources/StakedCap/"
+   },
+   "FeeAuction": {
+    "implementation": "0x57e1e8e5576c5cfbbb0000ef3f1af24e3a452074",
+    "sourcify_match": "exact_match",
+    "deployed_block": "23161300",
+    "sources": "tasks/cap/live-sources/FeeAuction/"
+   },
+   "FeeReceiver": {
+    "implementation": "0xb61e527d88831f6cb7a4c2d43be9805438ecc44f",
+    "sourcify_match": "exact_match",
+    "deployed_block": "23160875",
+    "sources": "tasks/cap/live-sources/FeeReceiver/"
+   }
+  }
+ },
+ "submission": {
+  "poc_dir": "test/hyblis",
+  "poc_template": "tasks/cap/poc/HyblisPoC.t.sol",
+  "entrypoint": "one .t.sol file: contract HyblisPoC is HyblisBase with setUp() and test_exploit() (optional step1()..stepN())",
+  "required": [
+   "report.md",
+   "PoC .t.sol",
+   "execution notes"
+  ],
+  "poc_base": "tasks/cap/poc/HyblisBase.sol"
+ },
+ "policy": {
+  "ffi": false,
+  "network": "read-only RPC for the pinned fork block only",
+  "rules": [
+   "One file test/hyblis/HyblisPoC.t.sol: contract HyblisPoC is HyblisBase, importing ./HyblisBase.sol",
+   "setUp() forks once, at the pinned block, through HYBLIS_ETH_RPC; one test, test_exploit()",
+   "Separate transactions: put each in a public step1() .. stepN() and call them in order from test_exploit()",
+   "Act only as accounts from makeAddr / makeAddrAndKey, contracts you deploy, or the PoC itself",
+   "Never impersonate a protocol contract, a trusted role, a whale or a victim; protocol admins are trusted",
+   "Capital only through _fund() (or deal(), routed the same way), within the task's cap; it is subtracted from your gain",
+   "Trusted-role actions and oracle moves only through _asRole / _setPrice, as the task allows",
+   "No vm.store, vm.etch, vm.mockCall, vm.deal, hoax, ffi, files, other forks, env reads or snapshots; time moves forward only",
+   "Impact is measured on the protocol itself; your asserts and logs are ignored; profit must end in an account you control",
+   "The file must also pass in plain forge test: it is the file that is filed"
+  ],
+  "limits": {
+   "runtime_s": 900,
+   "memory_gb": 4
+  }
+ }
+}

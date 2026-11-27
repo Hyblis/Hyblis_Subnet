@@ -1,0 +1,45 @@
+{
+ "_comment": "Release schedule: one program a week, two featured at once. Only 'featured' and 'open' programs are ever published; a program with a 'networks' list is published only on those networks. 'launch': intake opens at mainnet launch (set intake_open to true at launch). scope_summary and tags are public text. Programs queued for release are kept outside this repository.",
+ "launch": {
+  "intake_open": false,
+  "message": "Intake opens at mainnet launch."
+ },
+ "cadence": {
+  "release_every_days": 7,
+  "featured_at_once": 2,
+  "intake_closes": false
+ },
+ "tasks": [
+  {
+   "task_id": "cap",
+   "label": "Cap",
+   "status": "open",
+   "networks": [
+    "testnet"
+   ],
+   "opened_at": "2026-11-16",
+   "featured_until": null,
+   "severity_scope": [
+    "medium",
+    "low"
+   ],
+   "scope_summary": "Stablecoin protocol. The cUSD vault, lender, oracle, delegation and fee contracts on Ethereum mainnet.",
+   "tags": [],
+   "ready": true
+  },
+  {
+   "task_id": "aave-v4",
+   "label": "Aave V4",
+   "status": "featured",
+   "opened_at": null,
+   "featured_until": null,
+   "severity_scope": [
+    "medium",
+    "low"
+   ],
+   "scope_summary": "Core lending contracts. Medium and Low findings are filed at launch.",
+   "tags": [],
+   "ready": false
+  }
+ ]
+}

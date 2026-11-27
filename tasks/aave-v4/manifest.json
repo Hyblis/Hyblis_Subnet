@@ -1,0 +1,75 @@
+{
+ "task_id": "aave-v4",
+ "manifest_version": 1,
+ "created": "2026-11-16",
+ "status": "scaffold",
+ "status_note": "Structure and rules are set. The on-chain fields (fork_block, deployed addresses, verified live sources) are marked PENDING and must be filled by the live-verification pass (tasks/private-queue/scripts: fetch_src.py, sourcify.py, rootcheck.py, compare_code.py) before this task is released. No addresses are invented here.",
+ "profile": "P1-EVM-FOUNDRY-FORK",
+ "program": {
+  "name": "Aave V4",
+  "platform": "external bug bounty",
+  "rules_snapshot": "2026-11-16",
+  "tier_scope": [
+   "medium",
+   "low"
+  ],
+  "tier_scope_reason": "Launch scope: Medium and Low findings, which need no submission deposit. Critical and High are out of scope at launch.",
+  "deposit_usd": 0,
+  "poc_rule": "A coded Proof of Concept is required; submit through the program's own bounty platform only.",
+  "notes": [
+   "Only Medium and Low findings are filed from this task at launch.",
+   "Protocol admins / governance / privileged roles are trusted (see program-rules.json).",
+   "The program asks that automated scanning tools are not used without manual verification.",
+   "Platform rules: reports only through the program's bounty platform; no testing on live networks; no disclosure of a submitted vulnerability without consent."
+  ]
+ },
+ "code": {
+  "repo": "PENDING - set by the live-verification pass",
+  "commit": "PENDING",
+  "foundry_root": ".",
+  "in_scope_paths": [
+   "PENDING"
+  ],
+  "upstream_checkout": "tasks/upstream/aave-v4",
+  "live_code_note": "PENDING: confirm the in-scope contracts match deployed bytecode (Sourcify / compare_code.py) and record each implementation address + match status, exactly as tasks/cap/manifest.json does."
+ },
+ "chain": {
+  "chain_id": 1,
+  "fork_block": "PENDING",
+  "fork_block_hash": "PENDING",
+  "fork_block_timestamp": "PENDING",
+  "deployment_source": "PENDING"
+ },
+ "deployed": {
+  "_pending": "Filled by the verification pass with in-scope, address-checksummed contracts and their verified live implementations."
+ },
+ "submission": {
+  "poc_dir": "test/hyblis",
+  "poc_template": "tasks/aave-v4/poc/HyblisPoC.t.sol",
+  "entrypoint": "one .t.sol file: contract HyblisPoC is HyblisBase with setUp() and test_exploit() (optional step1()..stepN())",
+  "required": [
+   "PoC .t.sol"
+  ],
+  "poc_base": "tasks/aave-v4/poc/HyblisBase.sol"
+ },
+ "policy": {
+  "ffi": false,
+  "network": "read-only RPC for the pinned fork block only",
+  "rules": [
+   "One file test/hyblis/HyblisPoC.t.sol: contract HyblisPoC is HyblisBase, importing ./HyblisBase.sol",
+   "setUp() forks once, at the pinned block, through HYBLIS_ETH_RPC; one test, test_exploit()",
+   "Separate transactions: put each in a public step1() .. stepN() and call them in order from test_exploit()",
+   "Act only as accounts from makeAddr / makeAddrAndKey, contracts you deploy, or the PoC itself",
+   "Never impersonate a protocol contract, a trusted role, a whale or a victim; protocol admins are trusted",
+   "Capital only through _fund() (or deal(), routed the same way), within the task's cap; it is subtracted from your gain",
+   "Trusted-role actions and oracle moves only through _asRole / _setPrice, as the task allows",
+   "No vm.store, vm.etch, vm.mockCall, vm.deal, hoax, ffi, files, other forks, env reads or snapshots; time moves forward only",
+   "Impact is measured on the protocol itself; your asserts and logs are ignored; profit must end in an account you control",
+   "The file must also pass in plain forge test: it is the file that is filed"
+  ],
+  "limits": {
+   "runtime_s": 900,
+   "memory_gb": 4
+  }
+ }
+}

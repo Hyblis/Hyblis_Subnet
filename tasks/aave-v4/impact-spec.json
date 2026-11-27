@@ -1,0 +1,29 @@
+{
+ "task_id": "aave-v4",
+ "spec_version": 2,
+ "status": "scaffold",
+ "_note": "Impact spec v2 for the trace-verified runner (runner/README.md, 'impact-spec v2'). SCAFFOLD: the live-verification pass must add fork, tokens, holders, in_scope, views, invariants and probes from verified sources and the pinned block, then run gen_spec.py --self-check. Until then gen_spec.py refuses this spec and the runner cannot judge aave-v4 PoCs. Only Medium and Low findings are filed from this task at launch, so severity.max is medium.",
+ "pending_verification": [
+  "fork: chain_id, pinned block, block hash and timestamp",
+  "tokens: the in-scope reserves' underlying assets with USD prices at the block, capital tokens and caps (flash-loanable liquidity); Aave-issued tokens (aTokens / debt or share tokens) with supply views",
+  "holders: every value-holding Aave V4 contract (hubs, spokes, treasury) as custody; victim suppliers with claim views and withdraw probes",
+  "in_scope: verified addresses, implementations and ABIs",
+  "views and invariants: total backing >= total debt per reserve (solvency), supply/borrow index accounting (accounting)",
+  "attacker_claims: supply positions (+1) and debt positions (-1) per reserve, so borrowing is never counted as theft",
+  "price_feeds: oracle feeds and realistic bounds; trusted_actions: routine keeper actions if needed",
+  "benign_entry_points: liquidations; known_issues: prior audit findings",
+  "limits: max_warp_s / max_roll from Aave V4's real horizons (interest accrual, any cooldowns), with horizon_basis"
+ ],
+ "thresholds": {"min_usd": "10"},
+ "severity": {
+  "max": "medium",
+  "funds_loss": {"default": "medium"},
+  "unauthorized_mint": {"default": "medium"},
+  "insolvency": {"default": "medium"},
+  "funds_freeze": {"default": "medium"},
+  "accounting_error": {"default": "low"},
+  "griefing": {"default": "low"},
+  "dos": {"default": "low"}
+ },
+ "in_scope_impacts": ["funds_loss", "funds_freeze", "insolvency", "unauthorized_mint", "accounting_error"]
+}
