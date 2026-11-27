@@ -1,0 +1,74 @@
+{
+ "valid_sanity.t.sol": {
+  "forge": "pass",
+  "policy": "PASS",
+  "verdict": {
+   "reproduced": false,
+   "error": "no_impact"
+  }
+ },
+ "valid_supply_withdraw.t.sol": {
+  "forge": "pass",
+  "policy": "FLAG",
+  "verdict": {
+   "reproduced": false,
+   "error": "no_impact"
+  }
+ },
+ "invalid_prank_protocol.t.sol": {
+  "forge": "pass",
+  "policy": "REJECT",
+  "verdict": {
+   "reproduced": false,
+   "error": "impersonation"
+  }
+ },
+ "invalid_deal_protocol_token.t.sol": {
+  "forge": "pass",
+  "policy": "REJECT",
+  "verdict": {
+   "reproduced": false,
+   "error": "capital"
+  }
+ },
+ "invalid_ffi.t.sol": {
+  "forge": "fail",
+  "policy": "REJECT",
+  "verdict": {
+   "reproduced": false,
+   "error": "policy:ffi(string[])"
+  }
+ },
+ "invalid_mock.t.sol": {
+  "forge": "any",
+  "policy": "REJECT",
+  "verdict": {
+   "reproduced": false,
+   "error": "policy:mockCall(address,bytes,bytes)"
+  }
+ },
+ "flag_attacker_capital.t.sol": {
+  "forge": "pass",
+  "policy": "FLAG",
+  "verdict": {
+   "reproduced": false,
+   "error": "no_impact"
+  }
+ },
+ "invalid_store_hidden.t.sol": {
+  "forge": "pass",
+  "policy": "FLAG",
+  "verdict": {
+   "reproduced": false,
+   "error": "policy:store(address,bytes32,bytes32)"
+  }
+ },
+ "invalid_step_gap.t.sol": {
+  "forge": "pass",
+  "policy": "PASS",
+  "verdict": {
+   "reproduced": false,
+   "error": "poc_shape"
+  }
+ }
+}

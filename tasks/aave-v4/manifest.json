@@ -2,8 +2,8 @@
  "task_id": "aave-v4",
  "manifest_version": 1,
  "created": "2026-11-16",
- "status": "live-code-verified",
- "status_note": "Live code verified 2026-11-27 (tasks/aave-v4/live-code.json). Pending: pinned fork block and verified state snapshot, impact spec, control proofs.",
+ "status": "verified",
+ "status_note": "Verified 2026-11-27 at block 26508006: live code (tasks/aave-v4/live-code.json, re-checked from the proven snapshot), verified state snapshot (chain.snapshot_digest), impact spec v2 (self-check clean: every view, invariant and probe answers; an empty PoC is no_impact) and the control proofs (tasks/aave-v4/controls/expected.json).",
  "profile": "P1-EVM-FOUNDRY-FORK",
  "program": {
   "name": "Aave V4",
@@ -69,10 +69,11 @@
  },
  "chain": {
   "chain_id": 1,
-  "fork_block": "PENDING",
-  "fork_block_hash": "PENDING",
-  "fork_block_timestamp": "PENDING",
-  "deployment_source": "PENDING"
+  "fork_block": 26508006,
+  "fork_block_hash": "0x4b06deb027d15195f93348a0dbb3b68f303718a083e185881057157c9c12da09",
+  "fork_block_timestamp": 1795800083,
+  "deployment_source": "aave-dao/aave-address-book src/AaveV4Ethereum.sol (deployed); the system as the four hubs list it at the fork block (assets and spokes); implementations read from EIP-1967 slots at the fork block",
+  "snapshot_digest": "sha256:2b58f4aa25e51bfb4c238ae18b3a9c025924efb0de77e572e20c0dd7363d17e5"
  },
  "deployed": {
   "ACCESS_MANAGER": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
