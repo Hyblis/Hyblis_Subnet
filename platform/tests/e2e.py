@@ -376,8 +376,9 @@ async def main():
         assert prog["allowed_cheatcodes"] == [list(x) for x in runner_vocab.ALLOWED_CHEATCODES]
         assert prog["open_for_intake"] is True and not prog["verification_pending"]
         aave = await (await client.get("/api/program/aave-v4")).json()
-        assert aave["verification_pending"] and not aave["open_for_intake"] and aave["assets"] == []
-        assert aave["poc_template"] is None and aave["poc_base"]          # a scaffold template is not published
+        aave_pin = json.loads((config.TASKS_DIR / "aave-v4" / "manifest.json").read_text())["chain"]["fork_block"]
+        assert not aave["verification_pending"] and not aave["open_for_intake"] and aave["assets"], aave.keys()
+        assert f"FORK_BLOCK = {aave_pin};" in aave["poc_template"] and aave["poc_base"]   # verified, not ready
         assert (await client.get(f"/api/program/{QUEUED_ONE}")).status == 404
         assert (await client.get("/api/program/..%2Fx")).status == 404
         print("privacy: no amounts, platform, queue, program or report text on any public surface")
@@ -887,10 +888,16 @@ async def check_bundles():
     tdir.mkdir(parents=True)
     rel = json.loads((real_tasks / "releases.json").read_text())
     rel["tasks"].append({"task_id": "queued-demo", "label": "Queued demo", "status": "queued", "ready": False})
+    rel["tasks"].append({"task_id": "pending-demo", "label": "Pending demo", "status": "featured", "ready": False})
     (tdir / "releases.json").write_text(json.dumps(rel))
     for tid in ("cap", "aave-v4"):
         shutil.copytree(real_tasks / tid, tdir / tid, ignore=shutil.ignore_patterns("live-sources", "controls"))
     shutil.copytree(tdir / "cap", tdir / "queued-demo")                 # a queued program with a full pack
+    shutil.copytree(tdir / "aave-v4", tdir / "pending-demo")            # released, its verification not done yet
+    m = json.loads((tdir / "pending-demo" / "manifest.json").read_text())
+    m["task_id"] = "pending-demo"
+    m["chain"]["fork_block"] = "PENDING"
+    (tdir / "pending-demo" / "manifest.json").write_text(json.dumps(m))
     for tid in ("cap", "queued-demo"):
         m = json.loads((tdir / tid / "manifest.json").read_text())
         m["task_id"] = tid
@@ -927,6 +934,9 @@ async def check_bundles():
                       "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data),
                       "foundry": runner_vocab.FORGE_VERSION}, ct
         assert json.loads((config.PUBLIC_DIR / "programs" / "aave-v4.json").read_text())["check_tool"] is None
+        pend = json.loads((config.PUBLIC_DIR / "programs" / "pending-demo.json").read_text())
+        assert pend["verification_pending"] and pend["assets"] == [] and pend["poc_template"] is None, pend.keys()
+        assert pend["repo"] is None and pend["commit"] is None and pend["check_tool"] is None, pend.keys()
         terms = prog["runner_terms"]
         spec_actions = json.loads((tdir / "cap" / "impact-spec.json").read_text()).get("trusted_actions") or []
         assert terms["capital"] and terms["capital"][0]["symbol"] == "USDC", terms
@@ -1047,7 +1057,7 @@ async def launch_mode():
         assert (await (await site.get("/data/summary.json")).json())["releases"] == summary["releases"]
         prog = await (await client.get("/api/program/aave-v4")).json()
         assert prog["opened_at"] is None and prog["featured_until"] is None and not prog["open_for_intake"], prog
-        assert prog["poc_template"] is None and prog["check_tool"] is None and prog["verification_pending"]
+        assert prog["poc_template"] and prog["check_tool"] is None and not prog["verification_pending"]   # not ready
         assert publish.ready_task_ids() == set()                        # cap is not released here, aave is not ready
         for path in ("/api/program/cap",):
             assert (await client.get(path)).status == 404, path
@@ -1059,6 +1069,9 @@ async def launch_mode():
                          "summary.json", "tasks.json"], files
         blob = (json.dumps([tasks, summary, prog]) + "".join(
             (config.PUBLIC_DIR / f).read_text() for f in files)).lower()
+        # a verified program's runner terms give each capital token a "cap" field (its funding cap): that key
+        # is not Cap's program id, which the word list below must still catch anywhere else
+        blob = re.sub(r'"cap":\s*"', '"capital_cap": "', blob)
         for word in ('"cap"', 'hyblis-check-cap', 'stablecoin protocol', 'cusd', VAULT.lower(), LENDER.lower(),
                      'testnet', 'draft') + LEAKS:
             assert word not in blob, f"launch mode: {word!r} on a public surface"

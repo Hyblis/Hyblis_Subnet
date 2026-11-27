@@ -74,6 +74,7 @@ tasks/*
 !tasks/aave-v4/
 tasks/cap/RELEASE.md
 tasks/cap/release/
+tasks/aave-v4/release/
 # deployment and one-off operations scripts
 scripts/deploy/
 scripts/demo/

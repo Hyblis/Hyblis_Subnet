@@ -353,15 +353,16 @@ def program_public(task_id: str) -> dict | None:
 
     limits = policy.get("limits") or {}
     # Until the verification pass pins the fork block and the in-scope contracts, the program's template
-    # is a scaffold (no block, no addresses): it is published with the verified scope, not before.
+    # is a scaffold (no block, no addresses): it is published with the verified scope, not before. The
+    # addresses, repository and commit wait too, even when the live code is already checked.
     pending = fork_block is None or not assets
     out = dict(base)
     out.update({
         "chain_id": chain.get("chain_id") if type(chain.get("chain_id")) is int else None,
         "fork_block": fork_block,
-        "repo": code.get("repo") if isinstance(code.get("repo"), str) and code["repo"].startswith("https://") else None,
-        "commit": code.get("commit") if _COMMIT_RE.match(str(code.get("commit", ""))) else None,
-        "assets": assets,
+        "repo": None if pending else (code.get("repo") if isinstance(code.get("repo"), str) and code["repo"].startswith("https://") else None),
+        "commit": None if pending else (code.get("commit") if _COMMIT_RE.match(str(code.get("commit", ""))) else None),
+        "assets": [] if pending else assets,
         "poc_rules": [str(x) for x in (policy.get("rules") or [])][:12],
         "limits": {k: limits[k] for k in ("runtime_s", "memory_gb") if isinstance(limits.get(k), (int, float))},
         "trusted_roles": [str(x) for x in (rules.get("trusted_roles") or [])][:20],
