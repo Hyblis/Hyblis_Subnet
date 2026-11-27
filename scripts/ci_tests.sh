@@ -22,5 +22,6 @@ run "site: private pages"           python platform/tests/test_private_pages.py
 run "runner: verdict engine unit"   python -B runner/test_impact.py
 run "runner: static screen"         python -B platform/tests/test_policy_check.py
 run "runner: RPC rate limits"       python -B runner/state/tests/test_ratelimit.py
+run "runner: fresh-account bases"   python -B runner/state/tests/test_fresh_bases.py
 if [ "$fail" -eq 0 ]; then echo "ALL CI SUITES PASSED"; else echo "SOME CI SUITES FAILED"; fi
 exit $fail

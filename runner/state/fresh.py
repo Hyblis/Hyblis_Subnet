@@ -36,6 +36,8 @@ from .mpt import keccak
 
 HISTORY_CONTRACT = "0x0000f90827f1c53a10cb7a02335b175320002935"
 SMALL_BASES = range(64)          # plain Solidity layouts: mappings in the first 64 slots
+DISCOVER_SMALL = range(256)      # discovery also tries slots up to 255: OpenZeppelin upgradeable contracts keep
+                                 # their mappings after 50-slot gaps (e.g. weETH's ERC20 balances at slot 101)
 SMALL_STRUCT = 4                 # struct fields covered after keccak(key . small base)
 FOUND_STRUCT = 16                # struct fields covered after keccak(key . discovered base)
 NEST_SMALL = range(16)           # small bases also tried for nested (allowance-like) mappings
@@ -63,7 +65,7 @@ def mapping_bases(snap, budget: int = DISCOVERY_BUDGET) -> list[int]:
 
     A base b is found when keccak(pad32(k) . b) + i (i < 8) is a stored slot for some known address k
     (any account of the snapshot, or an address-like stored value). Candidates are the small slots
-    0..63 and, for ERC-7201 namespaced storage, root + 0..15 for every root r (a stored slot r + j with
+    0..255 and, for ERC-7201 namespaced storage, root + 0..15 for every root r (a stored slot r + j with
     j < 16 whose low byte is j). Results only widen coverage; correctness never depends on them."""
     digest = snap.digest
     with _cache_lock:
@@ -88,7 +90,7 @@ def mapping_bases(snap, budget: int = DISCOVERY_BUDGET) -> list[int]:
         x = int(v, 16)
         if (1 << 144) <= x < (1 << 160):
             keys.add("0x" + x.to_bytes(20, "big").hex())
-    cands = sorted(set(SMALL_BASES) | {r + j for r in roots for j in range(16)})
+    cands = sorted(set(DISCOVER_SMALL) | {r + j for r in roots for j in range(16)})
     keys_l = sorted(keys)
     if len(keys_l) * len(cands) > budget:
         keys_l = keys_l[: max(1, budget // max(1, len(cands)))]
