@@ -1,0 +1,88 @@
+# environments and tool homes
+.venv/
+.home/
+.cache/
+tools/foundry/
+tools/forge-std/
+tools/downloads/**/*.tar.gz
+
+# runtime
+run/
+logs/
+*.pid
+
+# secrets: never commit keys, wallets or env files with credentials
+.env
+*.key
+*.pem
+**/wallets/
+**/.secrets/
+
+# python / foundry build output
+__pycache__/
+*.pyc
+out/
+cache/
+broadcast/
+
+
+# vendored forge-std for the vault spike
+chain/vault/lib/
+chain/vault/out/
+
+# platform runtime (private DB + public exports are regenerated at runtime)
+platform/data/
+platform/public/
+
+# release data: verified state snapshots, prepared task projects, pin logs (large; content-addressed)
+runner-data/
+
+# ---- private: stays on the server, never in the public repository ----
+# keys and tokens kept beside the code
+run/
+*.token
+# internal documents (investor material, research, decisions, plans, operations runbook)
+docs/investor/
+docs/research/
+docs/architecture.md
+docs/decisions.md
+docs/design-v1.0-notes.md
+docs/final-plan-*.md
+docs/phase0-platform-rules.md
+docs/platform-questions.md
+docs/ports.md
+docs/roadmap.md
+docs/runner-impact-design.md
+docs/testnet-runbook.md
+docs/validation-and-incentive-design.md
+# scoring studies (internal reports, old simulators and their inputs)
+scoring/archive/
+scoring/report-*.md
+scoring/dist-results-*.json
+scoring/dist_params.json
+scoring/params.json
+scoring/policy-v1-proposed.json
+scoring/requirements-sim.txt
+scoring/simulate.py
+scoring/sim_distribution.py
+scoring/sim_vault.py
+# programs: only the released program packs are public (everything else under tasks/ stays private)
+tasks/*
+!tasks/README.md
+!tasks/releases.json
+!tasks/cap/
+!tasks/aave-v4/
+tasks/cap/RELEASE.md
+tasks/cap/release/
+# deployment and one-off operations scripts
+scripts/deploy/
+scripts/demo/
+scripts/build_preview.py
+scripts/testnet_split_reset.sh
+# design work (only the logo is public)
+design/*
+!design/logo/
+# server-only operations (boot wrapper, proof-page refresh)
+scripts/start_all.sh
+scripts/start_testnet_page.sh
+scripts/stop_testnet_page.sh
