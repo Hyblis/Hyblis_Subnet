@@ -92,15 +92,17 @@ contract HyblisHarness {
         holders[h.length] = poc;
         for (uint256 i; i < extra.length; i++) holders[h.length + 1 + i] = extra[i];
         (address[] memory st, bytes[] memory sd) = S.views();
-        (address[] memory ct, bytes4[] memory cs) = S.claimTemplates();
+        (address[] memory ct, bytes[] memory cpre, bytes[] memory cpost) = S.claimTemplates();
         uint256 n = st.length + ct.length * (1 + extra.length);
         vt = new address[](n);
         vd = new bytes[](n);
         for (uint256 i; i < st.length; i++) { vt[i] = st[i]; vd[i] = sd[i]; }
         uint256 k = st.length;
         for (uint256 c; c < ct.length; c++) {
-            vt[k] = ct[c]; vd[k] = abi.encodeWithSelector(cs[c], poc); k++;
-            for (uint256 i; i < extra.length; i++) { vt[k] = ct[c]; vd[k] = abi.encodeWithSelector(cs[c], extra[i]); k++; }
+            vt[k] = ct[c]; vd[k] = bytes.concat(cpre[c], abi.encode(poc), cpost[c]); k++;
+            for (uint256 i; i < extra.length; i++) {
+                vt[k] = ct[c]; vd[k] = bytes.concat(cpre[c], abi.encode(extra[i]), cpost[c]); k++;
+            }
         }
     }
 

@@ -19,5 +19,7 @@ run "pipeline: runner retries"      python platform/tests/test_requeue.py
 run "pipeline: warm-up track"       python platform/tests/test_warmup.py
 run "site: https redirect + HSTS"   python platform/tests/test_edge.py
 run "site: private pages"           python platform/tests/test_private_pages.py
+run "runner: verdict engine unit"   python -B runner/test_impact.py
+run "runner: static screen"         python -B platform/tests/test_policy_check.py
 if [ "$fail" -eq 0 ]; then echo "ALL CI SUITES PASSED"; else echo "SOME CI SUITES FAILED"; fi
 exit $fail

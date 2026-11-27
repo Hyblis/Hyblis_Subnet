@@ -137,6 +137,13 @@ class Reject(Exception):
         self.detail = detail
 
 
+def _claim_calldata(c: dict, who: str) -> bytes:
+    """The calldata of attacker claim `c` read for account `who` (gen_spec: prefix + account word + suffix;
+    a spec compiled before `args` existed carries only the selector)."""
+    pre = c.get("prefix", c["selector"])
+    return bytes.fromhex(pre + "0" * 24 + who[2:].lower() + c.get("suffix", ""))
+
+
 def explain(code: str) -> str:
     return ERRORS.get((code or "").split(":", 1)[0], "")
 
@@ -1035,7 +1042,7 @@ def _measurements(post_node, base_node, poc, ctx: Ctx) -> dict:
     exp_views = [(v["target"], bytes.fromhex(v["calldata"][2:])) for v in spec["views"]]
     for c in spec["attacker_claims"]:
         for who in [poc] + extra:
-            exp_views.append((c["target"], bytes.fromhex(c["selector"] + "0" * 24 + who[2:])))
+            exp_views.append((c["target"], _claim_calldata(c, who)))
     if tokens != [t["address"] for t in spec["tokens"]] or holders != exp_holders or \
             list(zip(targets, data)) != exp_views or watch != spec["code_watch"]:
         raise Reject("template", "harness measured a set other than the spec's")
@@ -1320,7 +1327,7 @@ def _anchor(impact, meas, A, diff_node, readset_node, probe_readsets, spec) -> d
     custody = {h["address"] for h in spec["holders"] if h["role"] == "custody"}
     vclaim_cd = {(v["target"], bytes.fromhex(v["calldata"][2:])): v for v in spec["views"] if v["role"] == "victim_claim"}
     state_cd = {(v["target"], bytes.fromhex(v["calldata"][2:])) for v in spec["views"] if v["role"] == "state"}
-    claim_by_sel = {(c["target"], c["selector"]): c for c in spec["attacker_claims"]}
+    claim_cd = {(c["target"], _claim_calldata(c, a)): c for c in spec["attacker_claims"] for a in A}
     slot_price: dict = {}
     S_cust, S_vclaim, S_aclaim, S_state, S_abal = set(), set(), set(), set(), set()
     for g in groups:
@@ -1338,8 +1345,8 @@ def _anchor(impact, meas, A, diff_node, readset_node, probe_readsets, spec) -> d
             S_vclaim |= g["slots"]
             for s_ in g["slots"]:
                 slot_price.setdefault(s_, P[sym[v["token"]]])
-        elif (g["target"], d4) in claim_by_sel and who in A:
-            c = claim_by_sel[(g["target"], d4)]
+        elif (g["target"], g["data"]) in claim_cd:
+            c = claim_cd[(g["target"], g["data"])]
             S_aclaim |= g["slots"]
             for s_ in g["slots"]:
                 slot_price.setdefault(s_, P[sym[c["token"]]] * c["sign"])

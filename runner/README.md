@@ -268,7 +268,7 @@ Written by Hyblis per task. `gen_spec.py` validates it strictly (unknown keys ar
 | `in_scope[]` | `name`, `address`, optional `implementation`, `functions` (signatures) or `abi_file` (names for the changed function) |
 | `protected_extra[]` | more addresses that may never be pranked or funded (admins, role holders, sinks) |
 | `views[]` | `id`, `target`, `sig`, `args`, `type` (uint/int/bool/address/bytes32), `role`: `state` or `victim_claim` (+ `token`: a decrease is a victim loss) |
-| `attacker_claims[]` | `id`, `target`, `sig` (one address argument), `type`, `token`, `sign` (+1 asset such as a deposit, -1 liability such as debt) measured for every attacker account |
+| `attacker_claims[]` | `id`, `target`, `sig`, `type`, `token`, `sign` (+1 asset such as a deposit, -1 liability such as debt) measured for every attacker account. A one-address `sig` needs nothing more; any other takes `args` with exactly one `"@account"` (an address argument) and static types only, e.g. `getUserTotalDebt(uint256,address)` with `[7, "@account"]` |
 | `invariants[]` | `id`, `class` (`solvency` -> insolvency, `accounting` -> accounting_error), `holds` (expression over view ids and `bal_<SYMBOL>_<holder id>`: arithmetic, comparisons, and/or/not), `shortfall` + `units` (solvency) |
 | `probes[]` | `id`, `class` (`freeze` -> funds_freeze, `liveness` -> dos), `actor`, `target`, `sig`, `args`, `gas`, `at_risk` (view id) and `at_risk_token` |
 | `trusted_actions[]` | `id`, `role`, `target`, `sig`, `args` (per argument `null` or `{eq|min|max}`), `max_calls` |
