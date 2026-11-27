@@ -1,0 +1,14 @@
+{
+ "variant": "v24_grief_then_prank_sink",
+ "rpc_url": "/tmp/hyblis-runner-test-czkkjclj/anvil.ipc",
+ "salt": "0xf6144ccfddc98c6d5c320b7e5fc8ccc7882f9e083228d6938f3b722383ee7b0a",
+ "steps": 0,
+ "expected": {
+  "reproduced": false,
+  "impact_type": "",
+  "measured_severity": "low",
+  "changed_function": "",
+  "changed_contract": "",
+  "error": "impersonation"
+ }
+}

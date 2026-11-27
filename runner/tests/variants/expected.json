@@ -1,0 +1,853 @@
+{
+ "_note": "Expected results for runner/tests/variants. screen = runner/policy_check.py (pre-filter only); verdict = the trace engine's verdict with the screen skipped (runner/tests/test_e2e.py). v53 through the flaky proxy must be nondeterministic. 'evidence_expected' (optional) is checked too. v61-v70, v93, v96 and v97 document review findings F1-F8 (2026-11-16), fixed in the engine/harness the same day.",
+ "variants": {
+  "v01_honest_theft": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "honest theft: validated, anchored on withdrawFor"
+  },
+  "v02_marker_only": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "no_impact"
+   },
+   "what": "a printed HYBLIS_IMPACT marker is never read"
+  },
+  "v03_store_fake_loss": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:store(address,bytes32,bytes32)"
+   },
+   "what": "vm.store to fake a loss"
+  },
+  "v04_prank_protocol": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "impersonation"
+   },
+   "what": "prank of the in-scope vault"
+  },
+  "v05_grief_sweep": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "insolvency",
+    "measured_severity": "medium",
+    "changed_function": "sweep()",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "sweep to the fee sink: insolvency, anchored on sweep"
+  },
+  "v06_freeze": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_freeze",
+    "measured_severity": "medium",
+    "changed_function": "freeze()",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "anyone can freeze: probe flips"
+  },
+  "v07_capital_roundtrip": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "no_impact"
+   },
+   "what": "capital round trip is not profit"
+  },
+  "v08_deal_direct": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:record()"
+   },
+   "what": "forge-std deal called around the faucet"
+  },
+  "v09_reenter_harness": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "reentry"
+   },
+   "what": "calls the harness again"
+  },
+  "v10_prank_harness": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "impersonation"
+   },
+   "what": "prank of the harness"
+  },
+  "v11_fork_latest": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "fork"
+   },
+   "what": "fork at another block"
+  },
+  "v12_setenv": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:setEnv(string,string)"
+   },
+   "what": "setEnv to redirect the baseline"
+  },
+  "v13_statediff_tamper": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:stopAndReturnStateDiff()"
+   },
+   "what": "steals the harness's state-diff recording"
+  },
+  "v14_hidden_store_helper": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:store(address,bytes32,bytes32)"
+   },
+   "what": "vm.store hidden in a helper, computed selector, assembly"
+  },
+  "v15_random": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:randomUint()"
+   },
+   "what": "randomness"
+  },
+  "v16_pause_tracing": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "no_json"
+   },
+   "what": "vm.pauseTracing breaks forge's JSON (fails closed)"
+  },
+  "v17_warp_drift": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "no_impact"
+   },
+   "what": "30-day warp alone: the baseline is warped too"
+  },
+  "v18_existing_cheat": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:warp(uint256)"
+   },
+   "what": "a forked contract calling cheatcodes"
+  },
+  "v19_mockcall": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:mockCall(address,bytes,bytes)"
+   },
+   "what": "mockCall balanceOf to fake a loss"
+  },
+  "v20_dangling_prank": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "dangling startPrank: the harness stops it"
+  },
+  "v21_faucet_abuse": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "capital"
+   },
+   "what": "faucet funds the vault"
+  },
+  "v22_assert_fail": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "poc_reverted"
+   },
+   "what": "a failing assert"
+  },
+  "v23_env_read": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "env"
+   },
+   "what": "reads HOME"
+  },
+  "v24_grief_then_prank_sink": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "impersonation"
+   },
+   "what": "griefing to the fee sink, then pranking the sink"
+  },
+  "v25_theft_with_capital": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "theft with capital: capital subtracted"
+  },
+  "v26_profit_in_attack_contract": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "profit kept in an attack contract the PoC created"
+  },
+  "v27_self_harm": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "no_impact"
+   },
+   "what": "burning own capital"
+  },
+  "v28_ctor_cheat": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:store(address,bytes32,bytes32)"
+   },
+   "what": "vm.store in the PoC constructor"
+  },
+  "v29_label_spoof": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "labels on VM and the vault do not change anything"
+  },
+  "v30_returnbomb": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "1 MB returndata is never copied"
+  },
+  "v31_snapshot_revert": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:revertToState(uint256)"
+   },
+   "what": "snapshot revert"
+  },
+  "v32_fork_twice": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "fork"
+   },
+   "what": "two forks"
+  },
+  "v33_multistep_anchor": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "deposit, own withdraw, then the bug: anchored on withdrawFor"
+  },
+  "v34_allowcheatcodes": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:allowCheatcodes(address)"
+   },
+   "what": "grants cheatcodes to the vault"
+  },
+  "v35_two_faced": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "standalone_differs"
+   },
+   "what": "exploits only under Hyblis"
+  },
+  "v36_deposit_then_freeze": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_freeze",
+    "measured_severity": "medium",
+    "changed_function": "freeze()",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "deposit then freeze: anchored on freeze"
+  },
+  "v37_sweep_after_own_roundtrip": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "insolvency",
+    "measured_severity": "medium",
+    "changed_function": "sweep()",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "own round trip then sweep: anchored on sweep"
+  },
+  "v38_dangling_expectrevert": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "standalone_fails"
+   },
+   "what": "dangling expectRevert: plain forge test fails"
+  },
+  "v39_no_fork": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "fork"
+   },
+   "what": "never forks"
+  },
+  "v40_steps_txboundary": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdraw()",
+    "changed_contract": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707"
+   },
+   "what": "transaction-boundary exploit with step1/step2 validates"
+  },
+  "v41_txboundary_no_steps": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "poc_reverted"
+   },
+   "what": "the same without steps reverts under the harness"
+  },
+  "v42_setprice_liquidation": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "liquidate(address)",
+    "changed_contract": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853"
+   },
+   "what": "bounded oracle move with _setPrice, liquidation bug"
+  },
+  "v43_setprice_out_of_bounds": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "helper"
+   },
+   "what": "oracle move beyond the spec's bound"
+  },
+  "v44_asrole_allowed": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "routine keeper action through _asRole"
+  },
+  "v45_asrole_not_allowed": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "helper"
+   },
+   "what": "admin action through _asRole that the spec does not list"
+  },
+  "v46_prank_keeper": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "impersonation"
+   },
+   "what": "prank of a trusted role"
+  },
+  "v47_foreign_key": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "impersonation"
+   },
+   "what": "account from a public fixed key"
+  },
+  "v48_mockcall_feed": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:mockCall(address,bytes,bytes)"
+   },
+   "what": "mockCall on the oracle instead of _setPrice"
+  },
+  "v49_assert_overloads": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "expectPartialRevert / expectRevert(bytes4,address) are allowed"
+  },
+  "v50_sign_own_key": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "makeAddrAndKey + vm.sign with an own key"
+  },
+  "v51_vm_deal": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:deal(address,uint256)"
+   },
+   "what": "vm.deal outside the faucet"
+  },
+  "v52_delegatecall_faucet": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "reentry"
+   },
+   "what": "delegatecall into the faucet"
+  },
+  "v53_flaky_fork": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "honest on a sound fork; nondeterministic through tests/flaky_proxy.py"
+  },
+  "v54_etch": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:etch(address,bytes)"
+   },
+   "what": "etch over a protocol token"
+  },
+  "v55_labels_only": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "no_impact"
+   },
+   "what": "label spoofing without an exploit"
+  },
+  "v56_extra_test": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "poc_shape"
+   },
+   "what": "a second test function"
+  },
+  "v57_backwards_warp": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "time"
+   },
+   "what": "rewind: time moves backwards"
+  },
+  "v58_deal_to_protocol": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "capital"
+   },
+   "what": "deal() through the faucet to the vault"
+  },
+  "v59_create2_helper": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "profit in a CREATE2 helper deployed by an attacker EOA"
+  },
+  "v60_network_exfil": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:rpc(string,string,string)"
+   },
+   "what": "vm.rpc to a URL (and no network in the sandbox)"
+  },
+  "v61_anchor_eth_collateral_prefix": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "review: ETH collateral deposit into the Lender, then the withdrawFor theft (review finding F1, fixed 2026-11-16)"
+  },
+  "v62_anchor_borrow_prefix": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "review: collateral deposit and an over-collateralised borrow, then the withdrawFor theft (review finding F1, fixed 2026-11-16)"
+  },
+  "v63_oos_cause_then_inscope_call": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "out_of_scope"
+   },
+   "what": "review: theft through the out-of-scope Token, then an unrelated legitimate vault deposit (review finding F2, fixed 2026-11-16)"
+  },
+  "v64_oos_cause_only": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "out_of_scope"
+   },
+   "what": "review: theft only through the out-of-scope Token: no in-scope contract changed state"
+  },
+  "v65_standalone_gas_twofaced": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "standalone_differs"
+   },
+   "what": "review: same in-scope call in both runs, gas-starved (and swallowed) only in plain forge test (review finding F5, fixed 2026-11-16)"
+  },
+  "v66_standalone_only_cheat": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "standalone_differs"
+   },
+   "what": "review: vm.store (computed selector) executed only in plain forge test (review finding F5, fixed 2026-11-16)"
+  },
+  "v67_steps_cheat_in_test_exploit": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "standalone_differs"
+   },
+   "what": "review: vm.store in test_exploit() of a stepped PoC (review finding F5, fixed 2026-11-16)"
+  },
+  "v68_ctor_gas_over_poc_gas": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "limits"
+   },
+   "what": "review: constructor uses 1.196e9 gas (toy poc_gas 1e9) (review finding F6, fixed 2026-11-16)"
+  },
+  "v69_test_gas_over_poc_gas": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "limits"
+   },
+   "what": "review: test_exploit needs more than poc_gas (review finding F8, fixed 2026-11-16)"
+  },
+  "v70_prank_dirty_address": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "impersonation"
+   },
+   "what": "review: startPrank(ALICE) with a dirty high byte in the address word (review finding F8, fixed 2026-11-16)"
+  },
+  "v71_unknown_forge_cheat": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:unknown(0x89b5a4cd)"
+   },
+   "what": "review: storeTransient exists in forge 1.9.0 but not in forge-std's Vm: unknown selector rejected"
+  },
+  "v72_delegatecall_forked_cheat": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "policy:warp(uint256)"
+   },
+   "what": "review: delegatecall into forked code that calls vm.warp (forge runs it in the PoC's context)"
+  },
+  "v73_warp_beyond_limit": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "time"
+   },
+   "what": "review: warp forward beyond limits.max_warp_s"
+  },
+  "v74_roll_beyond_limit": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": false,
+    "error": "time"
+   },
+   "what": "review: roll forward beyond limits.max_roll"
+  },
+  "v75_fork_in_test": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "fork"
+   },
+   "what": "review: the only fork is in test_exploit(), not setUp()"
+  },
+  "v76_fork_other_url": {
+   "screen": "REJECT",
+   "verdict": {
+    "reproduced": false,
+    "error": "fork"
+   },
+   "what": "review: pinned block through another URL"
+  },
+  "v77_capital_over_cap": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "capital"
+   },
+   "what": "review: _fund above the task's capital_cap"
+  },
+  "v78_fund_non_capital_token": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "capital"
+   },
+   "what": "review: _fund of a token the PoC deployed"
+  },
+  "v79_asrole_over_max_calls": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "helper"
+   },
+   "what": "review: _asRole more often than max_calls"
+  },
+  "v80_setprice_unlisted_feed": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "helper"
+   },
+   "what": "review: _setPrice on a feed the spec does not list"
+  },
+  "v81_steps_gap": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "poc_shape"
+   },
+   "what": "review: step1 and step3 (a gap)"
+  },
+  "v82_steps_17": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "limits"
+   },
+   "what": "review: 17 steps (limit 16)"
+  },
+  "v83_import_runner_file": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "poc_shape"
+   },
+   "what": "review: imports HyblisRuntime.sol"
+  },
+  "v84_ctor_args": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "poc_shape"
+   },
+   "what": "review: HyblisPoC constructor with an argument"
+  },
+  "v85_compile_error": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "compile"
+   },
+   "what": "review: syntax error, line number reported"
+  },
+  "v86_no_hyblispoc": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "poc_shape"
+   },
+   "what": "review: no contract named HyblisPoC"
+  },
+  "v87_sign_foreign_key": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "impersonation"
+   },
+   "what": "review: vm.sign with a fixed public key"
+  },
+  "v88_prank_foreign_origin": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "impersonation"
+   },
+   "what": "review: prank(own, victim) - tx.origin not controlled"
+  },
+  "v89_call_probe": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "reentry"
+   },
+   "what": "review: the PoC calls the harness's probe"
+  },
+  "v90_pending_expectcall": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "harness_failed"
+   },
+   "what": "review: vm.expectCall left pending"
+  },
+  "v91_too_many_attackers": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "limits"
+   },
+   "what": "review: 66 attacker accounts (limit 64)"
+  },
+  "v92_oversized_file": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "limits"
+   },
+   "what": "review: PoC file above 256 KiB"
+  },
+  "v93_reskin_griefing": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "griefing",
+    "measured_severity": "low",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "review: the v01 bug with the proceeds given away (review finding F4, fixed 2026-11-16)"
+  },
+  "v94_dangling_expectrevert_probe": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "no_impact"
+   },
+   "what": "review: expectRevert left pending (only under the runner) does not flip the probes"
+  },
+  "v95_self_liquidation": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": false,
+    "error": "no_impact"
+   },
+   "what": "review: own position liquidated by an own account through the bug: own funds are no loss"
+  },
+  "v96_insolvency_own_deposit": {
+   "screen": "PASS",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "insolvency",
+    "measured_severity": "medium",
+    "changed_function": "sweep()",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "evidence_expected": {
+    "amount_usd": 80.0
+   },
+   "what": "review: 20,000 TOK of own capital deposited, then the planted sweep (review finding F3, fixed 2026-11-16)"
+  },
+  "v97_steps_total_gas": {
+   "screen": "FLAG",
+   "verdict": {
+    "reproduced": true,
+    "impact_type": "funds_loss",
+    "measured_severity": "medium",
+    "changed_function": "withdrawFor(address,uint256)",
+    "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+   },
+   "what": "review: five steps of 0.925e9 gas each (poc_gas 1e9), theft in step5 (review finding F7, fixed 2026-11-16)"
+  }
+ }
+}

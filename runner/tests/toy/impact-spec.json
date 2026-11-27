@@ -1,0 +1,81 @@
+{
+ "task_id": "toy",
+ "spec_version": 2,
+ "status": "verified",
+ "_note": "Toy task for the runner tests (runner/tests). ${FORK_HASH} and ${FORK_TS} are filled in by runner/tests/toy_chain.py from the local anvil chain; every other value is fixed because the toy deployment is deterministic.",
+ "fork": {"chain_id": 31337, "block": 40, "block_hash": "${FORK_HASH}", "timestamp": "${FORK_TS}", "rpc_env": "HYBLIS_ETH_RPC"},
+ "limits": {
+  "max_warp_s": 31536000, "max_roll": 2628000,
+  "horizon_basis": "toy: the longest protocol horizon is the TxGuardVault one-day bonus; one year leaves room for interest-style tests",
+  "poc_gas": 1000000000, "max_attackers": 64, "max_steps": 16
+ },
+ "harness": {"poc_test": "test_exploit()"},
+ "tokens": [
+  {"symbol": "TOK", "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3", "decimals": 18, "usd": "1", "capital": true, "capital_cap": "1000000000000000000000000"},
+  {"symbol": "ETH", "address": "0x0000000000000000000000000000000000000000", "decimals": 18, "usd": "3000", "capital": true, "capital_cap": "1000000000000000000000"}
+ ],
+ "holders": [
+  {"id": "vault", "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0", "role": "custody"},
+  {"id": "guard", "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", "role": "custody"},
+  {"id": "lender", "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853", "role": "custody"},
+  {"id": "alice", "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "role": "victim"},
+  {"id": "bob", "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "role": "victim"},
+  {"id": "carol", "address": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65", "role": "victim"},
+  {"id": "dave", "address": "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc", "role": "victim"},
+  {"id": "feesink", "address": "0x000000000000000000000000000000000000FEE5", "role": "watch"}
+ ],
+ "in_scope": [
+  {"name": "Vault", "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+   "functions": ["deposit(uint256)", "withdraw(uint256)", "withdrawFor(address,uint256)", "sweep()", "freeze()", "harvest()", "setFeeSink(address)", "initialize(address,address,address,address)"]},
+  {"name": "VaultImpl", "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", "functions": []},
+  {"name": "TxGuardVault", "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", "functions": ["deposit(uint256)", "withdraw()"]},
+  {"name": "Lender", "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853", "functions": ["depositCollateral()", "borrow(uint256)", "liquidate(address)"]}
+ ],
+ "protected_extra": [
+  "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+  "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
+ ],
+ "views": [
+  {"id": "totalDeposits", "target": "@vault", "sig": "totalDeposits()", "type": "uint256", "role": "state"},
+  {"id": "solvent", "target": "@vault", "sig": "solvent()", "type": "bool", "role": "state"},
+  {"id": "frozen", "target": "@vault", "sig": "frozen()", "type": "bool", "role": "state"},
+  {"id": "dep_alice", "target": "@vault", "sig": "deposits(address)", "args": ["@alice"], "type": "uint256", "role": "victim_claim", "token": "TOK"},
+  {"id": "dep_bob", "target": "@vault", "sig": "deposits(address)", "args": ["@bob"], "type": "uint256", "role": "victim_claim", "token": "TOK"},
+  {"id": "guard_dave", "target": "@guard", "sig": "deposits(address)", "args": ["@dave"], "type": "uint256", "role": "victim_claim", "token": "TOK"},
+  {"id": "carol_collateral", "target": "@lender", "sig": "collateral(address)", "args": ["@carol"], "type": "uint256", "role": "victim_claim", "token": "ETH"},
+  {"id": "lender_debt", "target": "@lender", "sig": "totalDebt()", "type": "uint256", "role": "state"}
+ ],
+ "attacker_claims": [
+  {"id": "vault_deposit", "target": "@vault", "sig": "deposits(address)", "type": "uint256", "token": "TOK", "sign": 1},
+  {"id": "guard_deposit", "target": "@guard", "sig": "deposits(address)", "type": "uint256", "token": "TOK", "sign": 1},
+  {"id": "lender_collateral", "target": "@lender", "sig": "collateral(address)", "type": "uint256", "token": "ETH", "sign": 1},
+  {"id": "lender_debt", "target": "@lender", "sig": "debt(address)", "type": "uint256", "token": "TOK", "sign": -1}
+ ],
+ "invariants": [
+  {"id": "backing", "class": "solvency", "holds": "solvent", "shortfall": "totalDeposits - bal_TOK_vault", "units": "TOK"}
+ ],
+ "probes": [
+  {"id": "alice_withdraw_1", "class": "freeze", "actor": "@alice", "target": "@vault", "sig": "withdraw(uint256)", "args": ["1000000000000000000"], "gas": 5000000, "at_risk": "dep_alice"}
+ ],
+ "trusted_actions": [
+  {"id": "keeper_harvest", "role": "0x90F79bf6EB2c4f870365E785982E1f101E93b906", "target": "@vault", "sig": "harvest()", "max_calls": 5}
+ ],
+ "price_feeds": [
+  {"id": "eth_usd", "feed": "0x0165878A594ca255338adfa4d48449f69242Eb8F", "token": "ETH", "decimals": 8, "answer": "300000000000", "max_move_bps": 1000}
+ ],
+ "benign_entry_points": [],
+ "known_issues": [],
+ "thresholds": {"min_usd": "1"},
+ "severity": {
+  "max": "medium",
+  "funds_loss": {"default": "medium", "high_if_tvl_share": "0.1"},
+  "unauthorized_mint": {"default": "medium"},
+  "insolvency": {"default": "medium", "high_if_tvl_share": "0.1"},
+  "funds_freeze": {"default": "medium"},
+  "griefing": {"default": "low"},
+  "accounting_error": {"default": "low"},
+  "dos": {"default": "low"}
+ },
+ "in_scope_impacts": ["funds_loss", "unauthorized_mint", "insolvency", "funds_freeze", "griefing", "accounting_error", "dos"]
+}

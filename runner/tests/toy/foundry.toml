@@ -1,0 +1,14 @@
+# Toy task project for the runner tests. The runner never uses this file as is: it writes its own
+# hardened copy (runner/sanitize_foundry_toml.py) into every job.
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["lib"]
+remappings = ["forge-std/=lib/forge-std/src/"]
+solc_version = "0.8.28"
+evm_version = "cancun"
+offline = true
+ffi = false
+fs_permissions = []

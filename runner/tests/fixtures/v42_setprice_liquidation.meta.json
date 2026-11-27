@@ -1,0 +1,14 @@
+{
+ "variant": "v42_setprice_liquidation",
+ "rpc_url": "/tmp/hyblis-runner-test-czkkjclj/anvil.ipc",
+ "salt": "0x5fc5c54aa1462a6e1a43df9d4eb7f4efe89c9549c415a46910c7e4ae3114ffa2",
+ "steps": 0,
+ "expected": {
+  "reproduced": true,
+  "impact_type": "funds_loss",
+  "measured_severity": "medium",
+  "changed_function": "liquidate(address)",
+  "changed_contract": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+  "error": null
+ }
+}

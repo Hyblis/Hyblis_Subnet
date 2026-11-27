@@ -1,0 +1,14 @@
+{
+ "variant": "v35_two_faced",
+ "rpc_url": "/tmp/hyblis-runner-test-czkkjclj/anvil.ipc",
+ "salt": "0x878d630352407c547d96c0052af610cddc643790c69ac8c4d97caa4994ae67d8",
+ "steps": 0,
+ "expected": {
+  "reproduced": false,
+  "impact_type": "",
+  "measured_severity": "low",
+  "changed_function": "",
+  "changed_contract": "",
+  "error": "standalone_differs"
+ }
+}

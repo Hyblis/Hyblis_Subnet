@@ -1,0 +1,14 @@
+{
+ "variant": "v01_honest_theft",
+ "rpc_url": "/tmp/hyblis-runner-test-czkkjclj/anvil.ipc",
+ "salt": "0x3cb5decabaa271946181b7380c547acaf7315aea3f9e509ed22ece62b0b3186d",
+ "steps": 0,
+ "expected": {
+  "reproduced": true,
+  "impact_type": "funds_loss",
+  "measured_severity": "medium",
+  "changed_function": "withdrawFor(address,uint256)",
+  "changed_contract": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+  "error": null
+ }
+}

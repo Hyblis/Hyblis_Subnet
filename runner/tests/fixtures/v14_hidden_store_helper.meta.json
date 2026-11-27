@@ -1,0 +1,14 @@
+{
+ "variant": "v14_hidden_store_helper",
+ "rpc_url": "/tmp/hyblis-runner-test-czkkjclj/anvil.ipc",
+ "salt": "0x47f9baf30cde6a06a38ced1111de1b1c636d06cfd9381905c1afed390bdd302b",
+ "steps": 0,
+ "expected": {
+  "reproduced": false,
+  "impact_type": "",
+  "measured_severity": "low",
+  "changed_function": "",
+  "changed_contract": "",
+  "error": "policy:store(address,bytes32,bytes32)"
+ }
+}

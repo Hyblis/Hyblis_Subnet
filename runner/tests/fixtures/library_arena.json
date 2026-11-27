@@ -1,0 +1,71 @@
+{
+ "_note": "One leading library-deployment arena from forge 1.9.0 on the Cap project (2026-11-16), data/output/bytecode trimmed. runner/test_impact.py checks it is accepted and tampered forms are not.",
+ "arena": {
+  "arena": [
+   {
+    "parent": null,
+    "children": [
+     1
+    ],
+    "idx": 0,
+    "trace": {
+     "depth": 0,
+     "success": true,
+     "caller": "0x1f95d37f27ea0dea9c252fc09d5a6eaa97647353",
+     "address": "0x4e59b44847b379578588920ca78fbf26c0b4956c",
+     "maybe_precompile": null,
+     "selfdestruct_address": null,
+     "selfdestruct_refund_target": null,
+     "selfdestruct_transferred_value": null,
+     "kind": "CALL",
+     "value": "0x0",
+     "data": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "output": "0xb66fea7105123dbb0c87bfe9fb123341f6a6781b",
+     "bytecode": null,
+     "gas_used": 143329,
+     "gas_limit": 3999969608,
+     "gas_refund_counter": 0,
+     "status": "Return",
+     "steps": [],
+     "step_deltas": [],
+     "decoded": null
+    },
+    "logs": [],
+    "ordering": [
+     {
+      "Call": 0
+     }
+    ]
+   },
+   {
+    "parent": 0,
+    "children": [],
+    "idx": 1,
+    "trace": {
+     "depth": 1,
+     "success": true,
+     "caller": "0x4e59b44847b379578588920ca78fbf26c0b4956c",
+     "address": "0xb66fea7105123dbb0c87bfe9fb123341f6a6781b",
+     "maybe_precompile": false,
+     "selfdestruct_address": null,
+     "selfdestruct_refund_target": null,
+     "selfdestruct_transferred_value": null,
+     "kind": "CREATE2",
+     "value": "0x0",
+     "data": "0x61022a610034600b8282823980515f1a607314602857634e487b7160e01b5f52",
+     "output": "0x73b66fea7105123dbb0c87bfe9fb123341f6a6781b3014608060405260043610",
+     "bytecode": null,
+     "gas_used": 110982,
+     "gas_limit": 3937438285,
+     "gas_refund_counter": 0,
+     "status": "Return",
+     "steps": [],
+     "step_deltas": [],
+     "decoded": null
+    },
+    "logs": [],
+    "ordering": []
+   }
+  ]
+ }
+}

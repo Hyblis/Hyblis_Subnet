@@ -1,0 +1,14 @@
+{
+ "variant": "v40_steps_txboundary",
+ "rpc_url": "/tmp/hyblis-runner-test-czkkjclj/anvil.ipc",
+ "salt": "0xd50e3620a334e5153bd6309f1bab048964944290e60ac4fa225e677ff4ded4d3",
+ "steps": 2,
+ "expected": {
+  "reproduced": true,
+  "impact_type": "funds_loss",
+  "measured_severity": "medium",
+  "changed_function": "withdraw()",
+  "changed_contract": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+  "error": null
+ }
+}

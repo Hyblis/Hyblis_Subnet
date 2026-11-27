@@ -1,0 +1,367 @@
+{
+ "attacker_claims": [
+  {
+   "id": "vault_deposit",
+   "selector": "fc7e286d",
+   "sig": "deposits(address)",
+   "sign": 1,
+   "target": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+   "token": "TOK",
+   "type": "uint256"
+  },
+  {
+   "id": "guard_deposit",
+   "selector": "fc7e286d",
+   "sig": "deposits(address)",
+   "sign": 1,
+   "target": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+   "token": "TOK",
+   "type": "uint256"
+  },
+  {
+   "id": "lender_collateral",
+   "selector": "a5fdc5de",
+   "sig": "collateral(address)",
+   "sign": 1,
+   "target": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+   "token": "ETH",
+   "type": "uint256"
+  },
+  {
+   "id": "lender_debt",
+   "selector": "9b6c56ec",
+   "sig": "debt(address)",
+   "sign": -1,
+   "target": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+   "token": "TOK",
+   "type": "uint256"
+  }
+ ],
+ "benign_entry_points": [],
+ "code_watch": [
+  "0x0165878a594ca255338adfa4d48449f69242eb8f",
+  "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+  "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+  "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+  "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+  "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512"
+ ],
+ "fork": {
+  "block": 40,
+  "block_hash": "0xae57f147f59c8a35837dc674ae09ec6c3000f22bd1e531e1c618b251c3cda18b",
+  "chain_id": 31337,
+  "rpc_env": "HYBLIS_ETH_RPC",
+  "timestamp": 1794865783
+ },
+ "holders": [
+  {
+   "address": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+   "id": "vault",
+   "role": "custody",
+   "value_views": []
+  },
+  {
+   "address": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+   "id": "guard",
+   "role": "custody",
+   "value_views": []
+  },
+  {
+   "address": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+   "id": "lender",
+   "role": "custody",
+   "value_views": []
+  },
+  {
+   "address": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+   "id": "alice",
+   "role": "victim",
+   "value_views": []
+  },
+  {
+   "address": "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+   "id": "bob",
+   "role": "victim",
+   "value_views": []
+  },
+  {
+   "address": "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
+   "id": "carol",
+   "role": "victim",
+   "value_views": []
+  },
+  {
+   "address": "0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc",
+   "id": "dave",
+   "role": "victim",
+   "value_views": []
+  },
+  {
+   "address": "0x000000000000000000000000000000000000fee5",
+   "id": "feesink",
+   "role": "watch",
+   "value_views": []
+  }
+ ],
+ "in_scope": [
+  {
+   "address": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+   "functions": {
+    "2e1a7d4d": "withdraw(uint256)",
+    "35faa416": "sweep()",
+    "4641257d": "harvest()",
+    "62a5af3b": "freeze()",
+    "b6b55f25": "deposit(uint256)",
+    "da62e064": "setFeeSink(address)",
+    "db518db2": "withdrawFor(address,uint256)",
+    "f8c8765e": "initialize(address,address,address,address)"
+   },
+   "name": "Vault"
+  },
+  {
+   "address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+   "functions": {},
+   "name": "VaultImpl"
+  },
+  {
+   "address": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+   "functions": {
+    "3ccfd60b": "withdraw()",
+    "b6b55f25": "deposit(uint256)"
+   },
+   "name": "TxGuardVault"
+  },
+  {
+   "address": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+   "functions": {
+    "2f865568": "liquidate(address)",
+    "6f758140": "depositCollateral()",
+    "c5ebeaec": "borrow(uint256)"
+   },
+   "name": "Lender"
+  }
+ ],
+ "in_scope_impacts": [
+  "funds_loss",
+  "unauthorized_mint",
+  "insolvency",
+  "funds_freeze",
+  "griefing",
+  "accounting_error",
+  "dos"
+ ],
+ "invariants": [
+  {
+   "class": "solvency",
+   "holds": "solvent",
+   "id": "backing",
+   "impact": "insolvency",
+   "shortfall": "totalDeposits - bal_TOK_vault",
+   "units": "TOK"
+  }
+ ],
+ "known_issues": [],
+ "limits": {
+  "forge_timeout_s": 900,
+  "horizon_basis": "toy: the longest protocol horizon is the TxGuardVault one-day bonus; one year leaves room for interest-style tests",
+  "job_timeout_s": 2700,
+  "json_max_mb": 256,
+  "max_attackers": 64,
+  "max_roll": 2628000,
+  "max_steps": 16,
+  "max_warp_s": 31536000,
+  "poc_gas": 1000000000
+ },
+ "poc_test": "test_exploit()",
+ "poc_test_selector": "193ea65f",
+ "price_feeds": [
+  {
+   "answer": "300000000000",
+   "decimals": 8,
+   "feed": "0x0165878a594ca255338adfa4d48449f69242eb8f",
+   "id": "eth_usd",
+   "max_move_bps": 1000,
+   "token": "ETH"
+  }
+ ],
+ "probes": [
+  {
+   "actor": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+   "at_risk": "dep_alice",
+   "at_risk_token": "TOK",
+   "calldata": "0x2e1a7d4d0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+   "class": "freeze",
+   "gas": 5000000,
+   "id": "alice_withdraw_1",
+   "impact": "funds_freeze",
+   "sig": "withdraw(uint256)",
+   "target": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+  }
+ ],
+ "protected": [
+  "0x000000000000000000000000000000000000fee5",
+  "0x0165878a594ca255338adfa4d48449f69242eb8f",
+  "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65",
+  "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+  "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+  "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+  "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+  "0x90f79bf6eb2c4f870365e785982e1f101e93b906",
+  "0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc",
+  "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+  "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+  "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
+  "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+  "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+ ],
+ "severity": {
+  "accounting_error": {
+   "default": "low"
+  },
+  "dos": {
+   "default": "low"
+  },
+  "funds_freeze": {
+   "default": "medium"
+  },
+  "funds_loss": {
+   "default": "medium",
+   "high_if_tvl_share": "0.1"
+  },
+  "griefing": {
+   "default": "low"
+  },
+  "insolvency": {
+   "default": "medium",
+   "high_if_tvl_share": "0.1"
+  },
+  "max": "medium",
+  "unauthorized_mint": {
+   "default": "medium"
+  }
+ },
+ "spec_sha256": "5ee9b3102c29cbe3e9a4b90c4d8d89a1122ef0d1c57b9abd718f2f19f933f41e",
+ "spec_version": 2,
+ "status": "verified",
+ "task_id": "toy",
+ "thresholds": {
+  "min_usd": "1"
+ },
+ "tokens": [
+  {
+   "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+   "capital": true,
+   "capital_cap": "1000000000000000000000000",
+   "decimals": 18,
+   "issued_by_protocol": false,
+   "supply_view": null,
+   "symbol": "TOK",
+   "usd": "1"
+  },
+  {
+   "address": "0x0000000000000000000000000000000000000000",
+   "capital": true,
+   "capital_cap": "1000000000000000000000",
+   "decimals": 18,
+   "issued_by_protocol": false,
+   "supply_view": null,
+   "symbol": "ETH",
+   "usd": "3000"
+  }
+ ],
+ "trusted_actions": [
+  {
+   "arg_types": [],
+   "args": [],
+   "id": "keeper_harvest",
+   "max_calls": 5,
+   "role": "0x90f79bf6eb2c4f870365e785982e1f101e93b906",
+   "selector": "4641257d",
+   "sig": "harvest()",
+   "target": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+  }
+ ],
+ "views": [
+  {
+   "calldata": "0x7d882097",
+   "id": "totalDeposits",
+   "role": "state",
+   "sig": "totalDeposits()",
+   "target": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+   "token": null,
+   "type": "uint256"
+  },
+  {
+   "calldata": "0x9ad042f8",
+   "id": "solvent",
+   "role": "state",
+   "sig": "solvent()",
+   "target": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+   "token": null,
+   "type": "bool"
+  },
+  {
+   "calldata": "0x054f7d9c",
+   "id": "frozen",
+   "role": "state",
+   "sig": "frozen()",
+   "target": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+   "token": null,
+   "type": "bool"
+  },
+  {
+   "calldata": "0xfc7e286d00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+   "id": "dep_alice",
+   "role": "victim_claim",
+   "sig": "deposits(address)",
+   "target": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+   "token": "TOK",
+   "type": "uint256"
+  },
+  {
+   "calldata": "0xfc7e286d0000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+   "id": "dep_bob",
+   "role": "victim_claim",
+   "sig": "deposits(address)",
+   "target": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+   "token": "TOK",
+   "type": "uint256"
+  },
+  {
+   "calldata": "0xfc7e286d0000000000000000000000009965507d1a55bcc2695c58ba16fb37d819b0a4dc",
+   "id": "guard_dave",
+   "role": "victim_claim",
+   "sig": "deposits(address)",
+   "target": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+   "token": "TOK",
+   "type": "uint256"
+  },
+  {
+   "calldata": "0xa5fdc5de00000000000000000000000015d34aaf54267db7d7c367839aaf71a00a2c6a65",
+   "id": "carol_collateral",
+   "role": "victim_claim",
+   "sig": "collateral(address)",
+   "target": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+   "token": "ETH",
+   "type": "uint256"
+  },
+  {
+   "calldata": "0xfc7b9c18",
+   "id": "lender_debt",
+   "role": "state",
+   "sig": "totalDebt()",
+   "target": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+   "token": null,
+   "type": "uint256"
+  },
+  {
+   "calldata": "0x50d25bcd",
+   "id": "__feed_eth_usd",
+   "role": "state",
+   "sig": "latestAnswer()",
+   "target": "0x0165878a594ca255338adfa4d48449f69242eb8f",
+   "token": null,
+   "type": "int256"
+  }
+ ]
+}
